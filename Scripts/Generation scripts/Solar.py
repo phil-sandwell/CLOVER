@@ -27,7 +27,7 @@ class Solar():
         self.generation_filepath = self.location_filepath + '/Generation/PV/'
         self.input_data = pd.read_csv(self.generation_filepath + 'PV generation inputs.csv',header=None,index_col=0)[1]
         self.location_data_filepath = self.location_filepath + '/Location Data/'
-        self.location_input_data = pd.read_csv(self.location_data_filepath + 'Location inputs.csv',header=None,index_col=0)[1]
+        self.location_inputs = pd.read_csv(self.location_data_filepath + 'Location inputs.csv',header=None,index_col=0)[1]
 #%%
     def total_solar_output(self,start_year=2007):
         """
@@ -69,7 +69,7 @@ class Solar():
             .csv file of PV generation (kW/kWp) for the given year
         """
 #   Get input data from "Location data" file
-        time_dif = float(self.location_input_data.loc['Time difference'])
+        time_dif = float(self.location_inputs.loc['Time difference'])
 #   Get solar output in local time for the given year 
         solar_output = self.get_solar_local_time(
                 self.get_solar_generation_from_RN(gen_year),time_difference = time_dif)
@@ -134,13 +134,13 @@ class Solar():
         api_base = 'https://www.renewables.ninja/api/'
         s = requests.session()
         url = api_base + 'data/pv'
-        token = str(self.location_input_data.loc['token'])
+        token = str(self.location_inputs.loc['token'])
         s.headers = {'Authorization': 'Token ' + token}
 
 #   Gets some data from input file
         args = {
-            'lat': float(self.location_input_data.loc['Latitude']),
-            'lon': float(self.location_input_data.loc['Longitude']),
+            'lat': float(self.location_inputs.loc['Latitude']),
+            'lon': float(self.location_inputs.loc['Longitude']),
             'date_from': str(year)+'-01-01',
             'date_to': str(year)+'-12-31',
             'dataset': 'merra2',

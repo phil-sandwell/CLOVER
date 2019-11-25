@@ -35,7 +35,7 @@ class Energy_System():
         self.generation_filepath = self.location_filepath + '/Generation/'
         self.location_data_filepath = self.location_filepath + '/Location Data/'
         self.energy_system_filepath = self.location_filepath + '/Simulation/Energy system inputs.csv'
-        self.energy_system_inputs  = pd.read_csv(self.energy_system_filepath,header=None,index_col=0).round(decimals=3)
+        self.energy_system_inputs = pd.read_csv(self.energy_system_filepath,header=None,index_col=0).round(decimals=3)
         self.scenario_inputs = pd.read_csv(self.location_filepath + '/Scenario/Scenario inputs.csv' ,header=None,index_col=0).round(decimals=3)
         self.kerosene_data_filepath = self.location_filepath + '/Load/Devices in use/kerosene_in_use.csv'
         self.kerosene_usage = pd.read_csv(self.kerosene_data_filepath, index_col = 0).reset_index(drop=True)

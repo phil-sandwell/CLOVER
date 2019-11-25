@@ -28,7 +28,7 @@ class Finance():
         self.location_filepath = self.CLOVER_filepath + '/Locations/' + self.location
         self.location_inputs = pd.read_csv(self.location_filepath + '/Location Data/Location inputs.csv',header=None,index_col=0)[1]
         self.finance_filepath = self.location_filepath + '/Impact/Finance inputs.csv'
-        self.finance_inputs  = pd.read_csv(self.finance_filepath,header=None,index_col=0).round(decimals=3)[1]
+        self.finance_inputs = pd.read_csv(self.finance_filepath,header=None,index_col=0).round(decimals=3)[1]
         self.inverter_inputs = pd.read_csv(self.location_filepath + '/Load/Device load/yearly_load_statistics.csv',index_col=0)
 
 #%%
