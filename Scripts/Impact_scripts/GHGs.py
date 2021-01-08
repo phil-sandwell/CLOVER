@@ -19,7 +19,7 @@ import numpy as np
 import pandas as pd
 
 import sys
-sys.path.insert(0, './Scripts/Conversion scripts')
+sys.path.insert(0, './Scripts/Conversion_scripts')
 from Conversion import Conversion
 
 class GHGs():

@@ -20,7 +20,7 @@ import numpy as np
 import math
 
 import sys
-sys.path.insert(0, './Scripts/Conversion scripts')
+sys.path.insert(0, './Scripts/Conversion_scripts')
 from Conversion import Conversion
 
 class Load():

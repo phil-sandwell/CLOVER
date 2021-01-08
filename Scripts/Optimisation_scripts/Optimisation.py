@@ -20,12 +20,12 @@ import pandas as pd
 import datetime
 
 import sys
-sys.path.insert(0, './Scripts/Impact scripts/')
+sys.path.insert(0, './Scripts/Impact_scripts/')
 from Finance import Finance
 from GHGs import GHGs
-sys.path.insert(0, './Scripts/Conversion scripts')
+sys.path.insert(0, './Scripts/Conversion_scripts')
 from Conversion import Conversion
-sys.path.insert(0, './Scripts/Simulation scripts')
+sys.path.insert(0, './Scripts/Simulation_scripts')
 from Energy_System import Energy_System
 #%%
 class Optimisation():

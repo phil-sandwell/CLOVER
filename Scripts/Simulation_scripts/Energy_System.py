@@ -20,11 +20,11 @@ import datetime
 import math
 
 import sys
-sys.path.insert(0, './Scripts/Generation scripts/')
+sys.path.insert(0, './Scripts/Generation_scripts/')
 from Solar import Solar
 from Diesel import Diesel
 import sys
-sys.path.insert(0, './Scripts/Load scripts/')
+sys.path.insert(0, './Scripts/Load_scripts/')
 from Load import Load
 #%%
 class Energy_System():
