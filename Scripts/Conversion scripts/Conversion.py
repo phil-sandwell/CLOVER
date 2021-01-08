@@ -19,7 +19,7 @@ import numpy as np
 import scipy
 
 class Conversion():
-    def __init__(self):
+    def __init__(self,**kwargs):
         self.month_mid_day = [0, 14, 45, 72, 104, 133, 164, 194, 225, 256, 286, 317, 344, 364]
         self.hours = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23]
         self.month_start_day = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334]

@@ -23,8 +23,8 @@ sys.path.insert(0, './Scripts/Conversion scripts')
 from Conversion import Conversion
 
 class GHGs():
-    def __init__(self):
-        self.location = 'Bahraich'
+    def __init__(self,**kwargs):
+        self.location = kwargs.get('location')
         self.CLOVER_filepath = '.'
         self.location_filepath = self.CLOVER_filepath + '/Locations/' + self.location
         self.location_inputs = pd.read_csv(self.location_filepath + '/Location Data/Location inputs.csv',header=None,index_col=0)[1]
@@ -158,7 +158,7 @@ class GHGs():
         Function:
             Calculates GHGs of connecting households to the system
         Inputs:
-            households          DataFrame of households from Energy_System().simulation(...)
+            households          DataFrame of households from Energy_System(kwargs).simulation(...)
             year                Installation year
         Outputs:
             GHGs 
@@ -260,9 +260,9 @@ class GHGs():
         '''
         Function:
             Calculates GHGs of kerosene usage. NB start_year and end_year are not necessary
-                but are included for comparability to Finance().get_kerosene_expenditure(...)
+                but are included for comparability to Finance(kwargs).get_kerosene_expenditure(...)
         Inputs:
-            kerosene_lamps_in_use_hourly        Output from Energy_System().simulation(...)
+            kerosene_lamps_in_use_hourly        Output from Energy_System(kwargs).simulation(...)
             start_year                          Start year of simulation period
             end_year                            End year of simulation period
         Outputs:
@@ -278,9 +278,9 @@ class GHGs():
         Function:
             Calculates GHGs of kerosene usage that has been avoided by using the system,
                 NB start_year and end_year are not necessary but are included for comparability
-                to Finance().get_kerosene_expenditure(...)
+                to Finance(kwargs).get_kerosene_expenditure(...)
         Inputs:
-            kerosene_lamps_mitigated_hourly     Output from Energy_System().simulation(...)
+            kerosene_lamps_mitigated_hourly     Output from Energy_System(kwargs).simulation(...)
             start_year                          Start year of simulation period
             end_year                            End year of simulation period
         Outputs:
@@ -295,7 +295,7 @@ class GHGs():
         Function:
             Calculates GHGs of grid electricity used by the system
         Inputs:
-            grid_energy_hourly                  Output from Energy_System().simulation(...)
+            grid_energy_hourly                  Output from Energy_System(kwargs).simulation(...)
             start_year                          Start year of simulation period
             end_year                            End year of simulation period
         Outputs:
@@ -324,7 +324,7 @@ class GHGs():
         Function:
             Calculates GHGs of diesel fuel used by the system
         Inputs:
-            diesel_fuel_usage_hourly            Output from Energy_System().simulation(...)
+            diesel_fuel_usage_hourly            Output from Energy_System(kwargs).simulation(...)
             start_year                          Start year of simulation period
             end_year                            End year of simulation period
         Outputs:

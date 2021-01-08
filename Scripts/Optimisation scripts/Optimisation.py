@@ -29,8 +29,8 @@ sys.path.insert(0, './Scripts/Simulation scripts')
 from Energy_System import Energy_System
 #%%
 class Optimisation():
-    def __init__(self):
-        self.location = 'Bahraich'
+    def __init__(self,**kwargs):
+        self.location = kwargs.get('location')
         self.CLOVER_filepath = '.'
         self.location_filepath = self.CLOVER_filepath + '/Locations/' + self.location
         self.optimisation_filepath = self.location_filepath + '/Optimisation/Optimisation inputs.csv'
@@ -252,7 +252,7 @@ class Optimisation():
 #   Increase  and iterate over PV size
             iteration_PV_size = np.ceil(PV_size_max + PV_size_step)
             while iteration_PV_size >= PV_size_min:
-                simulation = Energy_System().simulation(start_year = start_year, end_year = end_year, 
+                simulation = Energy_System(kwargs).simulation(start_year = start_year, end_year = end_year, 
                                           PV_size = iteration_PV_size, 
                                           storage_size = test_storage_size)
                 new_appraisal = self.system_appraisal(simulation,previous_systems)
@@ -264,7 +264,7 @@ class Optimisation():
                 if iteration_PV_size < 0:
                     break
             if np.ceil(PV_size_max/PV_size_step)*PV_size_step != PV_size_max:
-                simulation = Energy_System().simulation(start_year = start_year, end_year = end_year, 
+                simulation = Energy_System(kwargs).simulation(start_year = start_year, end_year = end_year, 
                                           PV_size = PV_size_max, 
                                           storage_size = test_storage_size)
                 new_appraisal = self.system_appraisal(simulation,previous_systems)
@@ -282,7 +282,7 @@ class Optimisation():
 #   Increase  and iterate over storage size
             iteration_storage_size = np.ceil(storage_size_max + storage_size_step)
             while iteration_storage_size >= storage_size_min:
-                simulation = Energy_System().simulation(start_year = start_year, end_year = end_year, 
+                simulation = Energy_System(kwargs).simulation(start_year = start_year, end_year = end_year, 
                                           PV_size = test_PV_size, 
                                           storage_size = iteration_storage_size)
                 new_appraisal = self.system_appraisal(simulation,previous_systems)
@@ -294,7 +294,7 @@ class Optimisation():
                 if iteration_storage_size < 0:
                     break
             if np.ceil(storage_size_max/storage_size_step)*storage_size_step != storage_size_max:
-                simulation = Energy_System().simulation(start_year = start_year, end_year = end_year, 
+                simulation = Energy_System(kwargs).simulation(start_year = start_year, end_year = end_year, 
                                           PV_size = test_PV_size, 
                                           storage_size = storage_size_max)
                 new_appraisal = self.system_appraisal(simulation,previous_systems)
@@ -346,14 +346,14 @@ class Optimisation():
             storage_size_max = float(storage_sizes[0][1])
             storage_size_step = float(storage_sizes[0][2])            
 #   Check if largest system is sufficient
-        simulation = Energy_System().simulation(start_year = start_year, end_year = end_year, 
+        simulation = Energy_System(kwargs).simulation(start_year = start_year, end_year = end_year, 
                                           PV_size = PV_size_max, storage_size = storage_size_max)
         new_appraisal = self.system_appraisal(simulation,previous_systems)
 #   Increase system size until largest system is sufficient (if necessary)
         while self.check_threshold(new_appraisal).empty == True:
             PV_size_max = np.ceil(PV_size_max/PV_size_step)*PV_size_step
             storage_size_max = np.ceil(storage_size_max/storage_size_step)*storage_size_step
-            simulation = Energy_System().simulation(start_year = start_year, end_year = end_year, 
+            simulation = Energy_System(kwargs).simulation(start_year = start_year, end_year = end_year, 
                                           PV_size = PV_size_max, storage_size = storage_size_max)
             new_appraisal = self.system_appraisal(simulation,previous_systems)
             
@@ -376,7 +376,7 @@ class Optimisation():
         while PV_size_max >= PV_size_min:
             iteration_storage_size = storage_size_max
             while iteration_storage_size >= storage_size_min:
-                simulation = Energy_System().simulation(start_year = start_year, end_year = end_year, 
+                simulation = Energy_System(kwargs).simulation(start_year = start_year, end_year = end_year, 
                                               PV_size = PV_size_max, 
                                               storage_size = iteration_storage_size)
                 new_appraisal = self.system_appraisal(simulation,previous_systems)
@@ -389,7 +389,7 @@ class Optimisation():
                     break
 #   Check minimum case where no extra storage is required
             if iteration_storage_size < storage_size_min:
-                simulation = Energy_System().simulation(start_year = start_year, end_year = end_year,
+                simulation = Energy_System(kwargs).simulation(start_year = start_year, end_year = end_year,
                                           PV_size = PV_size_max, 
                                           storage_size = storage_size_min)
                 new_appraisal = self.system_appraisal(simulation,previous_systems)
@@ -400,7 +400,7 @@ class Optimisation():
             if (PV_size_max < PV_size_min) & (PV_size_max >= 0):
                 iteration_storage_size = storage_size_max
                 while iteration_storage_size >= storage_size_min:
-                    simulation = Energy_System().simulation(start_year = start_year, end_year = end_year, 
+                    simulation = Energy_System(kwargs).simulation(start_year = start_year, end_year = end_year, 
                                                   PV_size = PV_size_min, 
                                                   storage_size = iteration_storage_size)
                     new_appraisal = self.system_appraisal(simulation,previous_systems)
@@ -411,7 +411,7 @@ class Optimisation():
                     iteration_storage_size -= storage_size_step
 #   Check minimum case where no extra storage is required
                 if (iteration_storage_size < storage_size_min) & (iteration_storage_size >= 0):
-                    simulation = Energy_System().simulation(start_year = start_year, end_year = end_year,
+                    simulation = Energy_System(kwargs).simulation(start_year = start_year, end_year = end_year,
                                               PV_size = PV_size_max, 
                                               storage_size = storage_size_min)
                     new_appraisal = self.system_appraisal(simulation,previous_systems)
@@ -431,7 +431,7 @@ class Optimisation():
         Function:
             Appraises the technical performance of a minigrid system
         Inputs:
-            simulation          Outputs of Energy_System().simulation(...)
+            simulation          Outputs of Energy_System(kwargs).simulation(...)
             start_year          Start year of this simulation period
             end_year            End year of this simulation period
             
@@ -459,7 +459,7 @@ class Optimisation():
         unmet_fraction = total_unmet_energy/total_load_energy
 #   Calculate total discounted energy
         total_energy_daily = Conversion().hourly_profile_to_daily_sum(simulation_results['Total energy used (kWh)'])
-        discounted_energy = Finance().discounted_energy_total(total_energy_daily,start_year,end_year)       
+        discounted_energy = Finance(kwargs).discounted_energy_total(total_energy_daily,start_year,end_year)       
 #   Calculate proportion of kerosene displaced (defaults to zero if kerosene is not originally used)
         if np.sum(simulation_results['Kerosene lamps']) > 0.0:
             kerosene_displacement = ((np.sum(simulation_results['Kerosene mitigation']))/
@@ -490,7 +490,7 @@ class Optimisation():
         Function:
             Appraises the financial performance of a minigrid system
         Inputs:
-            simulation          Outputs of Energy_System().simulation(...)
+            simulation          Outputs of Energy_System(kwargs).simulation(...)
             previous_systems    Report from previously installed system (not require
                                     if no system was previously deployed)
         Outputs:
@@ -523,32 +523,32 @@ class Optimisation():
         diesel_addition = (simulation_details.loc['System details']['Diesel capacity']-
                        previous_system.loc['System details']['Diesel capacity'])
 #   Calculate new equipment costs (discounted)
-        equipment_costs = Finance().discounted_equipment_cost(
+        equipment_costs = Finance(kwargs).discounted_equipment_cost(
                 PV_array_size = PV_addition,
                 storage_size = storage_addition,diesel_size = diesel_addition,
-                year=intallation_year) + Finance().get_independent_expenditure(
+                year=intallation_year) + Finance(kwargs).get_independent_expenditure(
                         start_year,end_year)
 #   Calculate costs of connecting new households (discounted)
-        connections_cost = Finance().get_connections_expenditure(
+        connections_cost = Finance(kwargs).get_connections_expenditure(
                 households = simulation_results['Households'],
                 year = intallation_year)
 #   Calculate operating costs of the system during this simulation (discounted)
-        OM_costs = Finance().get_total_OM(
+        OM_costs = Finance(kwargs).get_total_OM(
                 PV_array_size = simulation_details.loc['System details']['Initial PV size'],
                 storage_size = simulation_details.loc['System details']['Initial storage size'],
                 diesel_size = simulation_details.loc['System details']['Diesel capacity'],
                 start_year = start_year,end_year = end_year)
 #   Calculate running costs of the system (discounted)
-        diesel_costs = Finance().get_diesel_fuel_expenditure(
+        diesel_costs = Finance(kwargs).get_diesel_fuel_expenditure(
                 diesel_fuel_usage_hourly = simulation_results['Diesel fuel usage (l)'],
                 start_year=start_year,end_year=end_year)
-        grid_costs = Finance().get_grid_expenditure(
+        grid_costs = Finance(kwargs).get_grid_expenditure(
                 grid_energy_hourly = simulation_results['Grid energy (kWh)'],
                 start_year=start_year,end_year=end_year)
-        kerosene_costs = Finance().get_kerosene_expenditure(
+        kerosene_costs = Finance(kwargs).get_kerosene_expenditure(
                 kerosene_lamps_in_use_hourly = simulation_results['Kerosene lamps'],
                 start_year=start_year,end_year=end_year)
-        kerosene_costs_mitigated = Finance().get_kerosene_expenditure_mitigated(
+        kerosene_costs_mitigated = Finance(kwargs).get_kerosene_expenditure_mitigated(
                 kerosene_lamps_mitigated_hourly = simulation_results['Kerosene mitigation'],
                 start_year=start_year,end_year=end_year)
 #   Total cost incurred during simulation period (discounted)
@@ -571,7 +571,7 @@ class Optimisation():
         Function:
             Appraises the environmental impact of a minigrid system
         Inputs:
-            simulation          Outputs of Energy_System().simulation(...)
+            simulation          Outputs of Energy_System(kwargs).simulation(...)
             previous_systems    Report from previously installed system (not require
                                     if no system was previously deployed)
         Outputs:
@@ -604,32 +604,32 @@ class Optimisation():
         diesel_addition = (simulation_details.loc['System details']['Diesel capacity']-
                        previous_system.loc['System details']['Diesel capacity'])
 #   Calculate new equipment GHGs
-        equipment_GHGs = GHGs().get_total_equipment_GHGs(
+        equipment_GHGs = GHGs(kwargs).get_total_equipment_GHGs(
                 PV_array_size = PV_addition,
                 storage_size = storage_addition,diesel_size = diesel_addition,
-                year=intallation_year) + GHGs().get_independent_GHGs(
+                year=intallation_year) + GHGs(kwargs).get_independent_GHGs(
                         start_year,end_year)
 #   Calculate GHGs of connecting new households
-        connections_GHGs = GHGs().get_connections_GHGs(
+        connections_GHGs = GHGs(kwargs).get_connections_GHGs(
                 households = simulation_results['Households'],
                 year = intallation_year)
 #   Calculate operating GHGs of the system during this simulation
-        OM_GHGs = GHGs().get_total_OM(
+        OM_GHGs = GHGs(kwargs).get_total_OM(
                 PV_array_size = simulation_details.loc['System details']['Initial PV size'],
                 storage_size = simulation_details.loc['System details']['Initial storage size'],
                 diesel_size = simulation_details.loc['System details']['Diesel capacity'],
                 start_year = start_year,end_year = end_year)
 #   Calculate running GHGs of the system
-        diesel_GHGs = GHGs().get_diesel_fuel_GHGs(
+        diesel_GHGs = GHGs(kwargs).get_diesel_fuel_GHGs(
                 diesel_fuel_usage_hourly = simulation_results['Diesel fuel usage (l)'],
                 start_year=start_year,end_year=end_year)
-        grid_GHGs = GHGs().get_grid_GHGs(
+        grid_GHGs = GHGs(kwargs).get_grid_GHGs(
                 grid_energy_hourly = simulation_results['Grid energy (kWh)'],
                 start_year=start_year,end_year=end_year)
-        kerosene_GHGs = GHGs().get_kerosene_GHGs(
+        kerosene_GHGs = GHGs(kwargs).get_kerosene_GHGs(
                 kerosene_lamps_in_use_hourly = simulation_results['Kerosene lamps'],
                 start_year=start_year,end_year=end_year)
-        kerosene_GHGs_mitigated = GHGs().get_kerosene_GHGs_mitigated(
+        kerosene_GHGs_mitigated = GHGs(kwargs).get_kerosene_GHGs_mitigated(
                 kerosene_lamps_mitigated_hourly = simulation_results['Kerosene mitigation'],
                 start_year=start_year,end_year=end_year)
 #   Total GHGs incurred during simulation period
@@ -652,7 +652,7 @@ class Optimisation():
         Function:
             Appraises the total performance of a minigrid system for all performance metrics
         Inputs:
-            simulation          Outputs of Energy_System().simulation(...)
+            simulation          Outputs of Energy_System(kwargs).simulation(...)
             previous_systems    Report from previously installed system (not required
                                     if no system was previously deployed)
         Outputs:
@@ -933,7 +933,7 @@ class Optimisation():
             for storage in np.arange(storage_size_min,storage_size_max+storage_size_step,storage_size_step):
 #   Run simulation
                 simulation_number += 1
-                simulation = Energy_System().simulation(start_year = start_year, end_year = end_year, 
+                simulation = Energy_System(kwargs).simulation(start_year = start_year, end_year = end_year, 
                                           PV_size = PV, storage_size = storage)
                 new_appraisal = self.system_appraisal(simulation,previous_systems)
                 system_appraisals = pd.concat([system_appraisals,new_appraisal.rename({

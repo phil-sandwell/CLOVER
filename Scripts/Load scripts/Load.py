@@ -24,8 +24,8 @@ sys.path.insert(0, './Scripts/Conversion scripts')
 from Conversion import Conversion
 
 class Load():
-    def __init__(self):
-        self.location = 'Bahraich'
+    def __init__(self,**kwargs):
+        self.location = kwargs.get('location')
         self.CLOVER_filepath = '.'
         self.location_filepath = self.CLOVER_filepath + '/Locations/' + self.location
         self.location_inputs = pd.read_csv(self.location_filepath + '/Location Data/Location inputs.csv',header=None,index_col=0)[1]
@@ -49,7 +49,7 @@ class Load():
         Outputs:
             Gives a .csv file with columns for the load of domestic and 
             commercial devices to be used in later simulations and a .csv file
-            of the load statistics from Load().yearly_load_statistics(...)
+            of the load statistics from Load(kwargs).yearly_load_statistics(...)
         """
         domestic_load = pd.DataFrame(np.zeros((int(self.location_inputs['Years'])*365*24, 1)))
         commercial_load = pd.DataFrame(np.zeros((int(self.location_inputs['Years'])*365*24, 1)))

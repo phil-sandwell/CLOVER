@@ -18,9 +18,9 @@ import pandas as pd
 import numpy as np
 
 class Diesel():
-    def __init__(self): 
+    def __init__(self,**kwargs): 
         self.size = 1
-        self.location = 'Bahraich'
+        self.location = kwargs.get('location')
         self.CLOVER_filepath = '.'
         self.location_filepath = self.CLOVER_filepath + '/Locations/' + self.location
         self.generation_filepath = self.location_filepath + '/Generation/'

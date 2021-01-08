@@ -20,8 +20,8 @@ import numpy as np
 import json
 
 class Solar():
-    def __init__(self):
-        self.location = 'Bahraich'
+    def __init__(self,**kwargs):
+        self.location = kwargs.get('location')
         self.CLOVER_filepath = '.'
         self.location_filepath = self.CLOVER_filepath + '/Locations/' + self.location
         self.generation_filepath = self.location_filepath + '/Generation/PV/'

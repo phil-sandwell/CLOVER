@@ -18,8 +18,8 @@ import pandas as pd
 import random
 
 class Grid():
-    def __init__(self):
-        self.location = 'Bahraich'
+    def __init__(self,**kwargs):
+        self.location = kwargs.get('location')
         self.CLOVER_filepath = '.'
         self.location_filepath = self.CLOVER_filepath + '/Locations/' + self.location
         self.location_inputs = pd.read_csv(self.location_filepath + '/Location Data/Location inputs.csv',header=None,index_col=0)[1]
@@ -37,7 +37,7 @@ class Grid():
             of the simulation period
         """
         grid_types = list(self.grid_inputs)
-        for i in range(Grid().grid_inputs.shape[1]):
+        for i in range(Grid(kwargs).grid_inputs.shape[1]):
             grid_hours = pd.DataFrame(self.grid_inputs[grid_types[i]])
             grid_status = []
             for day in range(365 * int(self.location_inputs['Years'])):

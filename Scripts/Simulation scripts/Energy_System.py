@@ -28,8 +28,8 @@ sys.path.insert(0, './Scripts/Load scripts/')
 from Load import Load
 #%%
 class Energy_System():
-    def __init__(self):
-        self.location = 'Bahraich'
+    def __init__(self,**kwargs):
+        self.location = kwargs.get('location')
         self.CLOVER_filepath = '.'
         self.location_filepath = self.CLOVER_filepath + '/Locations/' + self.location
         self.generation_filepath = self.location_filepath + '/Generation/'
@@ -103,7 +103,7 @@ class Energy_System():
         grid_energy = pd.DataFrame(input_profiles['Grid energy (kWh)']).abs()
         storage_profile = pd.DataFrame(input_profiles['Storage profile (kWh)'])
         kerosene_profile = pd.DataFrame(input_profiles['Kerosene lamps'])
-        households = pd.DataFrame(Load().population_hourly()[start_year*8760:end_year*8760].values)
+        households = pd.DataFrame(Load(kwargs).population_hourly()[start_year*8760:end_year*8760].values)
            
 #   Initialise battery storage parameters 
         max_energy_throughput = storage_size * self.energy_system_inputs[1]['Battery cycle lifetime']
@@ -186,9 +186,9 @@ class Energy_System():
 
 #   Use backup diesel generator
         if diesel_backup_status == "Y":
-            diesel_energy, diesel_times = Diesel().get_diesel_energy_and_times(unmet_energy,blackout_times,diesel_backup_threshold)
+            diesel_energy, diesel_times = Diesel(kwargs).get_diesel_energy_and_times(unmet_energy,blackout_times,diesel_backup_threshold)
             diesel_capacity = math.ceil(np.max(diesel_energy))
-            diesel_fuel_usage = pd.DataFrame(Diesel().get_diesel_fuel_usage(
+            diesel_fuel_usage = pd.DataFrame(Diesel(kwargs).get_diesel_fuel_usage(
                     diesel_capacity,diesel_energy,diesel_times).values)
             unmet_energy = pd.DataFrame(unmet_energy.values - diesel_energy.values)
             diesel_energy = diesel_energy.abs()
@@ -236,7 +236,7 @@ class Energy_System():
                                        'End year':float(end_year),
                                        'Initial PV size':PV_size,
                                        'Initial storage size':storage_size,
-                                       'Final PV size':PV_size*Solar().solar_degradation()[0][8760*(end_year-start_year)],
+                                       'Final PV size':PV_size*Solar(kwargs).solar_degradation()[0][8760*(end_year-start_year)],
                                        'Final storage size':storage_size*np.min(battery_health['Battery health']),
                                        'Diesel capacity':diesel_capacity
                                        },index=['System details'])
@@ -280,7 +280,7 @@ class Energy_System():
         Function:
             Saves simulation outputs to a .csv file
         Inputs:
-            simulation_name     DataFrame output from Energy_System().simulation(...)
+            simulation_name     DataFrame output from Energy_System(kwargs).simulation(...)
             filename            Name of .csv file to be saved as (defaults to timestamp)
         Outputs:
             Simulation saved to .csv file
@@ -358,7 +358,7 @@ class Energy_System():
         
 #   Initialise power generation, including degradation of PV
         PV_generation = PV_size * pd.DataFrame(self.get_PV_generation()[start_hour:end_hour].values 
-                                     * Solar().solar_degradation()[0:(end_hour-start_hour)].values)
+                                     * Solar(kwargs).solar_degradation()[0:(end_hour-start_hour)].values)
         grid_status = pd.DataFrame(self.get_grid_profile()[start_hour:end_hour].values)
         load_profile = pd.DataFrame(self.get_load_profile()[start_hour:end_hour].values)
         
