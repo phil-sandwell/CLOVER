@@ -29,9 +29,25 @@ class Load():
         self.CLOVER_filepath = '.'
         self.location_filepath = self.CLOVER_filepath + '/Locations/' + self.location
         self.location_inputs = pd.read_csv(self.location_filepath + '/Location Data/Location inputs.csv',header=None,index_col=0)[1]
+        # Replace input values with keywords if specified
+        if kwargs.get('location_inputs'):
+            for i in kwargs.get('location_inputs'):
+                if not i[0] in self.location_inputs.index:
+                    print("Couldn't find entry",i[0],"in location_inputs. Perhaps it's misspelt in kwargs? Printing list of possible variables and exiting.")
+                    print(self.location_inputs.index)
+                    exit(1)
+            self.location_inputs[i[0]] = i[1]
         self.device_filepath = self.location_filepath + '/Load/'
         self.device_ownership_filepath = self.device_filepath + '/Device ownership/'
         self.device_inputs = pd.read_csv(self.device_filepath + 'Devices.csv')
+        # Replace input values with keywords if specified
+        if kwargs.get('device_inputs'):
+            for i in kwargs.get('device_inputs'):
+                if not i[0] in self.device_inputs.index:
+                    print("Couldn't find entry",i[0],"in device_inputs. Perhaps it's misspelt in kwargs? Printing list of possible variables and exiting.")
+                    print(self.device_inputs.index)
+                    exit(1)
+            self.device_inputs[i[0]] = i[1]
         self.device_utilisation_filepath = self.device_filepath + '/Device utilisation/'
         self.device_usage_filepath = self.device_filepath + '/Devices in use/'
         self.device_load_filepath = self.device_filepath + 'Device load/'

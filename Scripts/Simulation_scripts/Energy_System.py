@@ -36,7 +36,23 @@ class Energy_System():
         self.location_data_filepath = self.location_filepath + '/Location Data/'
         self.energy_system_filepath = self.location_filepath + '/Simulation/Energy system inputs.csv'
         self.energy_system_inputs = pd.read_csv(self.energy_system_filepath,header=None,index_col=0).round(decimals=3)
+        # Replace input values with keywords if specified
+        if kwargs.get('energy_system_inputs'):
+            for i in kwargs.get('energy_system_inputs'):
+                if not i[0] in self.energy_system_inputs.index:
+                    print("Couldn't find entry",i[0],"in energy_system_inputs. Perhaps it's misspelt in kwargs? Printing list of possible variables and exiting.")
+                    print(self.energy_system_inputs.index)
+                    exit(1)
+            self.energy_system_inputs[i[0]] = i[1]
         self.scenario_inputs = pd.read_csv(self.location_filepath + '/Scenario/Scenario inputs.csv' ,header=None,index_col=0).round(decimals=3)
+        # Replace input values with keywords if specified
+        if kwargs.get('scenario_inputs'):
+            for i in kwargs.get('scenario_inputs'):
+                if not i[0] in self.scenario_inputs.index:
+                    print("Couldn't find entry",i[0],"in scenario_inputs. Perhaps it's misspelt in kwargs? Printing list of possible variables and exiting.")
+                    print(self.scenario_inputs.index)
+                    exit(1)
+            self.scenario_inputs[i[0]] = i[1]
         self.kerosene_data_filepath = self.location_filepath + '/Load/Devices in use/kerosene_in_use.csv'
         self.kerosene_usage = pd.read_csv(self.kerosene_data_filepath, index_col = 0).reset_index(drop=True)
         self.simulation_storage = self.location_filepath + '/Simulation/Saved simulations/'

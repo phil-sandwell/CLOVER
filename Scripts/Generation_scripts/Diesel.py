@@ -26,6 +26,14 @@ class Diesel():
         self.generation_filepath = self.location_filepath + '/Generation/'
         self.diesel_filepath = self.generation_filepath + 'Diesel/Diesel inputs.csv'
         self.diesel_inputs = pd.read_csv(self.diesel_filepath,header=None,index_col=0).round(decimals=3)
+        # Replace input values with keywords if specified
+        if kwargs.get('diesel_inputs'):
+            for i in kwargs.get('diesel_inputs'):
+                if not i[0] in self.diesel_inputs.index:
+                    print("Couldn't find entry",i[0],"in diesel_inputs. Perhaps it's misspelt in kwargs? Printing list of possible variables and exiting.")
+                    print(self.diesel_inputs.index)
+                    exit(1)
+            self.diesel_inputs[i[0]] = i[1]
 
 #%%       
 #   Energy threshold, above which the generator should switch on

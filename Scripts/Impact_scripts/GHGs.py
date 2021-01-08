@@ -28,10 +28,34 @@ class GHGs():
         self.CLOVER_filepath = '.'
         self.location_filepath = self.CLOVER_filepath + '/Locations/' + self.location
         self.location_inputs = pd.read_csv(self.location_filepath + '/Location Data/Location inputs.csv',header=None,index_col=0)[1]
+        # Replace input values with keywords if specified
+        if kwargs.get('location_inputs'):
+            for i in kwargs.get('location_inputs'):
+                if not i[0] in self.location_inputs.index:
+                    print("Couldn't find entry",i[0],"in location_inputs. Perhaps it's misspelt in kwargs? Printing list of possible variables and exiting.")
+                    print(self.location_inputs.index)
+                    exit(1)
+            self.location_inputs[i[0]] = i[1]
         self.GHG_filepath = self.location_filepath + '/Impact/GHG inputs.csv'
         self.GHG_inputs = pd.read_csv(self.GHG_filepath,header=None,index_col=0).round(decimals=3)[1]
+        # Replace input values with keywords if specified
+        if kwargs.get('GHG_inputs'):
+            for i in kwargs.get('GHG_inputs'):
+                if not i[0] in self.GHG_inputs.index:
+                    print("Couldn't find entry",i[0],"in GHG_inputs. Perhaps it's misspelt in kwargs? Printing list of possible variables and exiting.")
+                    print(self.GHG_inputs.index)
+                    exit(1)
+            self.GHG_inputs[i[0]] = i[1]
         self.finance_filepath = self.location_filepath + '/Impact/Finance inputs.csv'
         self.finance_inputs = pd.read_csv(self.finance_filepath,header=None,index_col=0).round(decimals=3)[1]
+        # Replace input values with keywords if specified
+        if kwargs.get('finance_inputs'):
+            for i in kwargs.get('finance_inputs'):
+                if not i[0] in self.finance_inputs.index:
+                    print("Couldn't find entry",i[0],"in finance_inputs. Perhaps it's misspelt in kwargs? Printing list of possible variables and exiting.")
+                    print(self.finance_inputs.index)
+                    exit(1)
+            self.finance_inputs[i[0]] = i[1]
         self.inverter_inputs = pd.read_csv(self.location_filepath + '/Load/Device load/yearly_load_statistics.csv',index_col=0)
 
 #%%

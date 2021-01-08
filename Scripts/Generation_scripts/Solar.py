@@ -28,6 +28,14 @@ class Solar():
         self.input_data = pd.read_csv(self.generation_filepath + 'PV generation inputs.csv',header=None,index_col=0)[1]
         self.location_data_filepath = self.location_filepath + '/Location Data/'
         self.location_inputs = pd.read_csv(self.location_data_filepath + 'Location inputs.csv',header=None,index_col=0)[1]
+        # Replace input values with keywords if specified
+        if kwargs.get('location_inputs'):
+            for i in kwargs.get('location_inputs'):
+                if not i[0] in self.location_inputs.index:
+                    print("Couldn't find entry",i[0],"in location_inputs. Perhaps it's misspelt in kwargs? Printing list of possible variables and exiting.")
+                    print(self.location_inputs.index)
+                    exit(1)
+            self.location_inputs[i[0]] = i[1]
 #%%
     def total_solar_output(self,start_year=2007):
         """

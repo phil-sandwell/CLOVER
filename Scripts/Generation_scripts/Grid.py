@@ -23,8 +23,24 @@ class Grid():
         self.CLOVER_filepath = '.'
         self.location_filepath = self.CLOVER_filepath + '/Locations/' + self.location
         self.location_inputs = pd.read_csv(self.location_filepath + '/Location Data/Location inputs.csv',header=None,index_col=0)[1]
+        # Replace input values with keywords if specified
+        if kwargs.get('location_inputs'):
+            for i in kwargs.get('location_inputs'):
+                if not i[0] in self.location_inputs.index:
+                    print("Couldn't find entry",i[0],"in location_inputs. Perhaps it's misspelt in kwargs? Printing list of possible variables and exiting.")
+                    print(self.location_inputs.index)
+                    exit(1)
+            self.location_inputs[i[0]] = i[1]
         self.generation_filepath = self.location_filepath + '/Generation/Grid/'
         self.grid_inputs = pd.read_csv(self.generation_filepath + 'Grid inputs.csv',index_col=0)
+        # Replace input values with keywords if specified
+        if kwargs.get('grid_inputs'):
+            for i in kwargs.get('grid_inputs'):
+                if not i[0] in self.grid_inputs.index:
+                    print("Couldn't find entry",i[0],"in grid_inputs. Perhaps it's misspelt in kwargs? Printing list of possible variables and exiting.")
+                    print(self.grid_inputs.index)
+                    exit(1)
+            self.grid_inputs[i[0]] = i[1]
 #%%
     def get_lifetime_grid_status(self):
         """

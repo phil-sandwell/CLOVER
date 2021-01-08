@@ -35,6 +35,14 @@ class Optimisation():
         self.location_filepath = self.CLOVER_filepath + '/Locations/' + self.location
         self.optimisation_filepath = self.location_filepath + '/Optimisation/Optimisation inputs.csv'
         self.optimisation_inputs = pd.read_csv(self.optimisation_filepath,header=None,index_col=0).round(decimals=3)
+        # Replace input values with keywords if specified
+        if kwargs.get('optimisation_inputs'):
+            for i in kwargs.get('optimisation_inputs'):
+                if not i[0] in self.optimisation_inputs.index:
+                    print("Couldn't find entry",i[0],"in optimisation_inputs. Perhaps it's misspelt in kwargs? Printing list of possible variables and exiting.")
+                    print(self.optimisation_inputs.index)
+                    exit(1)
+            self.optimisation_inputs[i[0]] = i[1]
         self.maximum_criteria = ['Blackouts','LCUE ($/kWh)','Emissions intensity (gCO2/kWh)','Unmet energy fraction',
                                  'Cumulative cost ($)','Cumulative system cost ($)',
                                  'Total cost ($)','Total system cost ($)',
