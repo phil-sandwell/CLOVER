@@ -20,17 +20,17 @@ import datetime
 import math
 
 import sys
-sys.path.insert(0, '/***YOUR LOCAL FILE PATH***/CLOVER 4.0/Scripts/Generation scripts/')
+sys.path.insert(0, './Scripts/Generation scripts/')
 from Solar import Solar
 from Diesel import Diesel
 import sys
-sys.path.insert(0, '/***YOUR LOCAL FILE PATH***/CLOVER 4.0/Scripts/Load scripts/')
+sys.path.insert(0, './Scripts/Load scripts/')
 from Load import Load
 #%%
 class Energy_System():
     def __init__(self):
         self.location = 'Bahraich'
-        self.CLOVER_filepath = '/***YOUR LOCAL FILE PATH***/CLOVER 4.0'
+        self.CLOVER_filepath = '.'
         self.location_filepath = self.CLOVER_filepath + '/Locations/' + self.location
         self.generation_filepath = self.location_filepath + '/Generation/'
         self.location_data_filepath = self.location_filepath + '/Location Data/'

@@ -22,7 +22,7 @@ import json
 class Solar():
     def __init__(self):
         self.location = 'Bahraich'
-        self.CLOVER_filepath = '/***YOUR LOCAL FILE PATH***/CLOVER 4.0'
+        self.CLOVER_filepath = '.'
         self.location_filepath = self.CLOVER_filepath + '/Locations/' + self.location
         self.generation_filepath = self.location_filepath + '/Generation/PV/'
         self.input_data = pd.read_csv(self.generation_filepath + 'PV generation inputs.csv',header=None,index_col=0)[1]
