@@ -35,7 +35,8 @@ class GHGs():
                     print("Couldn't find entry",i[0],"in location_inputs. Perhaps it's misspelt in kwargs? Printing list of possible variables and exiting.")
                     print(self.location_inputs.index)
                     exit(1)
-            self.location_inputs[i[0]] = i[1]
+                self.location_inputs[i[0]] = i[1]
+        self.location_inputs['Location'] = self.location
         self.GHG_filepath = self.location_filepath + '/Impact/GHG inputs.csv'
         self.GHG_inputs = pd.read_csv(self.GHG_filepath,header=None,index_col=0).round(decimals=3)[1]
         # Replace input values with keywords if specified
@@ -45,7 +46,7 @@ class GHGs():
                     print("Couldn't find entry",i[0],"in GHG_inputs. Perhaps it's misspelt in kwargs? Printing list of possible variables and exiting.")
                     print(self.GHG_inputs.index)
                     exit(1)
-            self.GHG_inputs[i[0]] = i[1]
+                self.GHG_inputs[i[0]] = i[1]
         self.finance_filepath = self.location_filepath + '/Impact/Finance inputs.csv'
         self.finance_inputs = pd.read_csv(self.finance_filepath,header=None,index_col=0).round(decimals=3)[1]
         # Replace input values with keywords if specified
@@ -55,9 +56,9 @@ class GHGs():
                     print("Couldn't find entry",i[0],"in finance_inputs. Perhaps it's misspelt in kwargs? Printing list of possible variables and exiting.")
                     print(self.finance_inputs.index)
                     exit(1)
-            self.finance_inputs[i[0]] = i[1]
-        self.inverter_inputs = pd.read_csv(self.location_filepath + '/Load/Device load/yearly_load_statistics.csv',index_col=0)
-
+                self.finance_inputs[i[0]] = i[1]
+        self.yearly_load_statistics_file=kwargs.get('yearly_load_stats_override','yearly_load_statistics.csv')
+        self.inverter_inputs = pd.read_csv(self.location_filepath + '/Load/Device load/' + self.yearly_load_statistics_file ,index_col=0)
 #%%
 #==============================================================================
 #   EQUIPMENT GHGs
@@ -182,7 +183,7 @@ class GHGs():
         Function:
             Calculates GHGs of connecting households to the system
         Inputs:
-            households          DataFrame of households from Energy_System(kwargs).simulation(...)
+            households          DataFrame of households from Energy_System(**self.kwargs).simulation(...)
             year                Installation year
         Outputs:
             GHGs 
@@ -284,9 +285,9 @@ class GHGs():
         '''
         Function:
             Calculates GHGs of kerosene usage. NB start_year and end_year are not necessary
-                but are included for comparability to Finance(kwargs).get_kerosene_expenditure(...)
+                but are included for comparability to Finance(**self.kwargs).get_kerosene_expenditure(...)
         Inputs:
-            kerosene_lamps_in_use_hourly        Output from Energy_System(kwargs).simulation(...)
+            kerosene_lamps_in_use_hourly        Output from Energy_System(**self.kwargs).simulation(...)
             start_year                          Start year of simulation period
             end_year                            End year of simulation period
         Outputs:
@@ -302,9 +303,9 @@ class GHGs():
         Function:
             Calculates GHGs of kerosene usage that has been avoided by using the system,
                 NB start_year and end_year are not necessary but are included for comparability
-                to Finance(kwargs).get_kerosene_expenditure(...)
+                to Finance(**self.kwargs).get_kerosene_expenditure(...)
         Inputs:
-            kerosene_lamps_mitigated_hourly     Output from Energy_System(kwargs).simulation(...)
+            kerosene_lamps_mitigated_hourly     Output from Energy_System(**self.kwargs).simulation(...)
             start_year                          Start year of simulation period
             end_year                            End year of simulation period
         Outputs:
@@ -319,7 +320,7 @@ class GHGs():
         Function:
             Calculates GHGs of grid electricity used by the system
         Inputs:
-            grid_energy_hourly                  Output from Energy_System(kwargs).simulation(...)
+            grid_energy_hourly                  Output from Energy_System(**self.kwargs).simulation(...)
             start_year                          Start year of simulation period
             end_year                            End year of simulation period
         Outputs:
@@ -348,7 +349,7 @@ class GHGs():
         Function:
             Calculates GHGs of diesel fuel used by the system
         Inputs:
-            diesel_fuel_usage_hourly            Output from Energy_System(kwargs).simulation(...)
+            diesel_fuel_usage_hourly            Output from Energy_System(**self.kwargs).simulation(...)
             start_year                          Start year of simulation period
             end_year                            End year of simulation period
         Outputs:

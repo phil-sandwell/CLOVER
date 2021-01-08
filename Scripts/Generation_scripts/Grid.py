@@ -19,6 +19,7 @@ import random
 
 class Grid():
     def __init__(self,**kwargs):
+        self.kwargs = kwargs
         self.location = kwargs.get('location')
         self.CLOVER_filepath = '.'
         self.location_filepath = self.CLOVER_filepath + '/Locations/' + self.location
@@ -30,7 +31,8 @@ class Grid():
                     print("Couldn't find entry",i[0],"in location_inputs. Perhaps it's misspelt in kwargs? Printing list of possible variables and exiting.")
                     print(self.location_inputs.index)
                     exit(1)
-            self.location_inputs[i[0]] = i[1]
+                self.location_inputs[i[0]] = i[1]
+        self.location_inputs['Location'] = self.location
         self.generation_filepath = self.location_filepath + '/Generation/Grid/'
         self.grid_inputs = pd.read_csv(self.generation_filepath + 'Grid inputs.csv',index_col=0)
         # Replace input values with keywords if specified
@@ -40,7 +42,7 @@ class Grid():
                     print("Couldn't find entry",i[0],"in grid_inputs. Perhaps it's misspelt in kwargs? Printing list of possible variables and exiting.")
                     print(self.grid_inputs.index)
                     exit(1)
-            self.grid_inputs[i[0]] = i[1]
+                self.grid_inputs[i[0]] = i[1]
 #%%
     def get_lifetime_grid_status(self):
         """
@@ -53,7 +55,7 @@ class Grid():
             of the simulation period
         """
         grid_types = list(self.grid_inputs)
-        for i in range(Grid(kwargs).grid_inputs.shape[1]):
+        for i in range(Grid(**self.kwargs).grid_inputs.shape[1]):
             grid_hours = pd.DataFrame(self.grid_inputs[grid_types[i]])
             grid_status = []
             for day in range(365 * int(self.location_inputs['Years'])):

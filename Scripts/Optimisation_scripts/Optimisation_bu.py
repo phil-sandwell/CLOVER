@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 ===============================================================================
-                      	      OPTIMISATION FILE
+                                OPTIMISATION FILE
 ===============================================================================
                             Most recent update:
                                 3 May 2019
@@ -35,6 +35,7 @@ class Optimisation():
         self.CLOVER_filepath = '.'
         self.location_filepath = self.CLOVER_filepath + '/Locations/' + self.location
         self.optimisation_filepath = self.location_filepath + '/Optimisation/Optimisation inputs.csv'
+        self.energy_system_filepath = self.location_filepath + '/Simulation/Energy system inputs.csv'
         self.optimisation_inputs = pd.read_csv(self.optimisation_filepath,header=None,index_col=0).round(decimals=3)
         # Replace input values with keywords if specified
         if kwargs.get('optimisation_inputs'):
@@ -43,9 +44,18 @@ class Optimisation():
                     print("Couldn't find entry",i[0],"in optimisation_inputs. Perhaps it's misspelt in kwargs? Printing list of possible variables and exiting.")
                     print(self.optimisation_inputs.index)
                     exit(1)
-                self.optimisation_inputs.at[i[0]] = i[1]
-        self.maximum_criteria = ['Blackouts','LCUE ($/kWh)','LCSE ($/kWh)','Emissions intensity (gCO2/kWh)','Unmet energy fraction',
-                                 'Cumulative cost ($)','Cumulative system cost ($)','Cumulative storage cost ($)',
+                self.optimisation_inputs.at[i[0],1] = i[1]
+        self.energy_system_inputs = pd.read_csv(self.energy_system_filepath,header=None,index_col=0).round(decimals=3)
+        # Replace input values with keywords if specified
+        if kwargs.get('energy_system_inputs'):
+            for i in kwargs.get('energy_system_inputs'):
+                if not i[0] in self.energy_system_inputs.index:
+                    print("Couldn't find entry",i[0],"in energy_system_inputs. Perhaps it's misspelt in kwargs? Printing list of possible variables and exiting.")
+                    print(self.energy_system_inputs.index)
+                    exit(1)
+                self.energy_system_inputs.at[i[0],1] = i[1]
+        self.maximum_criteria = ['Blackouts','LCUE ($/kWh)','Emissions intensity (gCO2/kWh)','Unmet energy fraction',
+                                 'Cumulative cost ($)','Cumulative system cost ($)',
                                  'Total cost ($)','Total system cost ($)',
                                  'Cumulative GHGs (kgCO2eq)','Cumulative system GHGs (kgCO2eq)',
                                  'Total GHGs (kgCO2eq)','Total system GHGs (kgCO2eq)']
@@ -98,19 +108,47 @@ class Optimisation():
         storage_size_step = float(self.optimisation_inputs[1]['Storage size (step)'])
         PV_increase = float(self.optimisation_inputs[1]['PV size (increase)'])
         storage_increase = float(self.optimisation_inputs[1]['Storage size (increase)'])
+        battery_lifetime_loss = self.energy_system_inputs[1]['Battery lifetime loss']
 #   Iterate over each optimisation step
         for step in range(steps):
             print('\nStep '+str(step+1)+' of '+str(steps))
             step_results = self.optimisation_step(PV_sizes,storage_sizes,previous_systems,
                           start_year)
             results = pd.concat([results,step_results],axis=0)
+
+#   Check if battery degradation is beyond end-of-life threshold for rafts of storage installed in each year. If so, eliminate that storage.
+            if step == 0:
+                    # Get storage at beginning and end of this step. storage_remaining[0] will be updated in each step, and will represent the amount of storage_installed[0] left at the end of the step being iterated over.
+                    storage_installed[0] = float(step_results['Initial storage size'])
+                    storage_remaining[0] = storage_installed[0] * float(step_results['Final storage size']) / float(step_results['Initial storage size'])
+                    # Check if amount of storage left at the end of this step is less than the defined end-of-life capacity. If so, then eliminate that storage for the next round.
+                    if storage_remaining[0] < (1-battery_lifetime_loss)*storage_installed[0]:
+                        storage_remaining[0] = 0 
+                    # total_storage_remaining[step] is defined once for each step, and represents the sum of remaining capacities of storage installed in each preceding step of the simulation.
+                    total_storage_remaining[0] = storage_remaining[0]
+            else:
+                    # Get newly installed storage at beginning of this step
+                    storage_installed[step]=float(step_results['Initial storage size']) - total_storage_remaining[step-1]
+                    # Set total remaining storage initial value to zero before adding contributions from each previous step (some of which could be zero where storage is past end of life)
+                    total_storage_remaining[step] = 0.0
+                    # Iterate over each step preceding this one
+                    for step_count in range(step):
+                        # Calculate remaining storage from that installed in each previous step. Based on the assumption that capacity installed in each preceding step decays by same %age capacity.
+                        storage_remaining[step_count] = storage_remaining[step_count-1] * float(step_results['Final storage size']) / float(step_results['Initial storage size'])
+                        # Check if amount of storage left at the end of this step is less than the defined end-of-life capacity. If so, then eliminate that storage for the next round.
+                        if storage_remaining[step_count] < (1-battery_lifetime_loss)*storage_installed[step_count]:
+                            storage_remaining[step_count] = 0
+                        # Add storage from previous step under consideration to total value at end of this step. This value will then be used as the minumum storage at the start of the next step.
+                        total_storage_remaining[step] += storage_remaining[step_count]
+
 #   Prepare inputs for next optimisation step
             start_year += iteration_length
             previous_systems = step_results
             PV_size_min = float(step_results['Final PV size'])
-            storage_size_min = float(step_results['Final storage size'])
+                # This has been amended from as defined by Phil to eliminate constibution of batteries past the end of their life.
+            storage_size_min = total_storage_remaining[step]
             PV_size_max = float(step_results['Final PV size'] + PV_increase)
-            storage_size_max = float(step_results['Final storage size'] + storage_increase)
+            storage_size_max = total_storage_remaining[step] + storage_increase
             PV_sizes = [PV_size_min,PV_size_max,PV_size_step]
             storage_sizes = [storage_size_min,storage_size_max,storage_size_step]    
 #   End simulation timer
@@ -468,9 +506,7 @@ class Optimisation():
         unmet_fraction = total_unmet_energy/total_load_energy
 #   Calculate total discounted energy
         total_energy_daily = Conversion().hourly_profile_to_daily_sum(simulation_results['Total energy used (kWh)'])
-        storage_energy_daily = Conversion().hourly_profile_to_daily_sum(simulation_results['Storage energy supplied (kWh)'])
-        discounted_energy = Finance(**self.kwargs).discounted_energy_total(total_energy_daily,start_year,end_year)  
-        discounted_storage_energy = Finance(**self.kwargs).discounted_energy_total(storage_energy_daily,start_year,end_year)  
+        discounted_energy = Finance(**self.kwargs).discounted_energy_total(total_energy_daily,start_year,end_year)       
 #   Calculate proportion of kerosene displaced (defaults to zero if kerosene is not originally used)
         if np.sum(simulation_results['Kerosene lamps']) > 0.0:
             kerosene_displacement = ((np.sum(simulation_results['Kerosene mitigation']))/
@@ -491,11 +527,10 @@ class Optimisation():
         system_outputs['Grid energy (kWh)'] = total_grid_used
         system_outputs['Diesel energy (kWh)'] = total_diesel_used
         system_outputs['Discounted energy (kWh)'] = discounted_energy
-        system_outputs['Discounted storage energy (kWh)'] = discounted_storage_energy
         system_outputs['Kerosene displacement'] = kerosene_displacement
         system_outputs['Diesel fuel usage (l)'] = total_diesel_fuel
 #   Return outputs
-        print('Renewables fraction:'+str(np.round(renewables_fraction,3))+', unmet fraction:'+str(np.round(unmet_fraction,3))+', blackout time proportion: '+str(np.round(system_blackouts,3)))
+        print('Renewables fraction:'+str(np.round(renewables_fraction,3))+', unmet fraction:'+str(np.round(unmet_fraction,3)))
         return system_outputs.round(3)
     
     def simulation_financial_appraisal(self,simulation,previous_systems = pd.DataFrame([])):
@@ -523,8 +558,7 @@ class Optimisation():
                                             'Final storage size':0.0,
                                             'Diesel capacity':0.0,
                                             'Total system cost ($)':0.0,
-                                            'Discounted energy (kWh)':0.0,
-                                            'Discounted storage energy (kWh)':0.0
+                                            'Discounted energy (kWh)':0.0
                                             },index=['System details'])
         else:
             previous_system = previous_systems.tail(1).reset_index(drop=True)
@@ -538,11 +572,10 @@ class Optimisation():
             storage_addition = (simulation_details.loc['System details']['Initial storage size']-
                        previous_system.loc['System details']['Final storage size'])
         else:
-            storage_addition = (simulation_details.loc['System details']['Initial storage size'])
+            storage_addition = (simulation_details.loc['System details']['Initial storage size']
 
 #   Calculate new equipment costs (discounted)
-        equipment_costs = Finance(**self.kwargs).discounted_equipment_cost(PV_array_size = PV_addition,storage_size = storage_addition,diesel_size = diesel_addition,year=intallation_year) + Finance(**self.kwargs).get_independent_expenditure(start_year,end_year)
-        storage_costs = Finance(**self.kwargs).get_storage_cost(storage_size = storage_addition)
+        equipment_costs = Finance(**self.kwargs).discounted_equipment_cost(PV_array_size = PV_addition, storage_size = storage_addition, diesel_size = diesel_addition, year=intallation_year) + Finance(**self.kwargs).get_independent_expenditure(start_year,end_year)
 #   Calculate costs of connecting new households (discounted)
         connections_cost = Finance(**self.kwargs).get_connections_expenditure(
                 households = simulation_results['Households'],
@@ -573,7 +606,6 @@ class Optimisation():
         system_outputs['Total cost ($)'] = total_cost
         system_outputs['Total system cost ($)'] = total_system_cost
         system_outputs['New equipment cost ($)'] = equipment_costs
-        system_outputs['New storage cost ($)'] = storage_costs
         system_outputs['New connection cost ($)'] = connections_cost
         system_outputs['O&M cost ($)'] = OM_costs
         system_outputs['Diesel cost ($)'] = diesel_costs
@@ -607,8 +639,7 @@ class Optimisation():
                                             'Final storage size':0.0,
                                             'Diesel capacity':0.0,
                                             'Total system cost ($)':0.0,
-                                            'Discounted energy (kWh)':0.0,
-                                            'Discounted storage energy (kWh)':0.0
+                                            'Discounted energy (kWh)':0.0
                                             },index=['System details'])
         else:
             previous_system = previous_systems.tail(1).reset_index(drop=True)
@@ -622,7 +653,7 @@ class Optimisation():
             storage_addition = (simulation_details.loc['System details']['Initial storage size']-
                        previous_system.loc['System details']['Final storage size'])
         else:
-            storage_addition = (simulation_details.loc['System details']['Initial storage size'])
+            storage_addition = (simulation_details.loc['System details']['Initial storage size']
 
 #   Calculate new equipment GHGs
         equipment_GHGs = GHGs(**self.kwargs).get_total_equipment_GHGs(
@@ -657,7 +688,7 @@ class Optimisation():
         total_GHGs = equipment_GHGs + connections_GHGs + OM_GHGs + diesel_GHGs + grid_GHGs + kerosene_GHGs
         total_system_GHGs = equipment_GHGs + connections_GHGs + OM_GHGs + diesel_GHGs + grid_GHGs
 #   Return outputs        
-        system_outp${load_scenario}uts['Total GHGs (kgCO2eq)'] = total_GHGs
+        system_outputs['Total GHGs (kgCO2eq)'] = total_GHGs
         system_outputs['Total system GHGs (kgCO2eq)'] = total_system_GHGs
         system_outputs['New equipment GHGs (kgCO2eq)'] = equipment_GHGs
         system_outputs['New connection GHGs (kgCO2eq)'] = connections_GHGs
@@ -689,15 +720,12 @@ class Optimisation():
                                             'Total system cost ($)':0.0,
                                             'Total system GHGs (kgCO2eq)':0.0,
                                             'Discounted energy (kWh)':0.0,
-                                            'Discounted storage energy (kWh)':0.0,
                                             'Cumulative cost ($)':0.0,
                                             'Cumulative system cost ($)':0.0,
-                                            'Cumulative storage cost ($)':0.0,
                                             'Cumulative GHGs (kgCO2eq)':0.0,
                                             'Cumulative system GHGs (kgCO2eq)':0.0,
                                             'Cumulative energy (kWh)':0.0,
                                             'Cumulative discounted energy (kWh)':0.0,
-                                            'Cumulative discounted storage energy (kWh)':0.0,
                                             },index=['System results'])
         else:
             previous_system = previous_systems.tail(1).reset_index(drop=True)
@@ -714,8 +742,6 @@ class Optimisation():
                                               previous_system['Cumulative cost ($)'])
         cumulative_system_costs = (financial_results['Total system cost ($)'] + 
                                               previous_system['Cumulative system cost ($)'])
-        cumulative_storage_costs = (financial_results['New storage cost ($)'] + 
-                                              previous_system['Cumulative storage cost ($)'])
         cumulative_GHGs = (environmental_results['Total GHGs (kgCO2eq)'] +
                                               previous_system['Cumulative GHGs (kgCO2eq)'])
         cumulative_system_GHGs = (environmental_results['Total system GHGs (kgCO2eq)'] +
@@ -724,30 +750,22 @@ class Optimisation():
                                               previous_system['Cumulative energy (kWh)'])
         cumulative_discounted_energy = (technical_results['Discounted energy (kWh)'] + 
                                               previous_system['Cumulative discounted energy (kWh)'])
-        cumulative_discounted_storage_energy = (technical_results['Discounted storage energy (kWh)'] + 
-                                              previous_system['Cumulative discounted storage energy (kWh)'])
 #   Combined metrics        
         LCUE = float(cumulative_system_costs / cumulative_discounted_energy)
-        LCSE = float(cumulative_storage_costs / cumulative_discounted_storage_energy)
         emissions_intensity = 1000.0 * float(cumulative_system_GHGs / cumulative_energy) # in grams
 #   Format outputs
         combined_outputs['Cumulative cost ($)'] = cumulative_costs
         combined_outputs['Cumulative system cost ($)'] = cumulative_system_costs
-        combined_outputs['Cumulative storage cost ($)'] = cumulative_storage_costs
         combined_outputs['Cumulative GHGs (kgCO2eq)'] = cumulative_GHGs
         combined_outputs['Cumulative system GHGs (kgCO2eq)'] = cumulative_system_GHGs
         combined_outputs['Cumulative energy (kWh)'] = cumulative_energy
         combined_outputs['Cumulative discounted energy (kWh)'] = cumulative_discounted_energy
-        combined_outputs['Cumulative discounted storage energy (kWh)'] = cumulative_discounted_storage_energy
         combined_outputs['LCUE ($/kWh)'] = np.round(LCUE,3)
-        combined_outputs['LCSE ($/kWh)'] = np.round(LCSE,3)
         combined_outputs['Emissions intensity (gCO2/kWh)'] = np.round(emissions_intensity,3)
 #   Return results
         system_outputs = pd.concat([system_details,combined_outputs,technical_results,
                                     financial_results,environmental_results],axis=1)
-        print('LCUE:'+str(np.round(LCUE,3))+', emissions intensity:'+str(np.round(emissions_intensity,3)) + ', LCSE:'+str(np.round(LCSE,3)))
-        print('cumulative_storage_costs:'+str(np.round(cumulative_storage_costs,3))+', cumulative_discounted_storage_energy:'+str(np.round(cumulative_discounted_storage_energy,3)))
-        print('cumulative_storage_costs:'+str(np.round(cumulative_storage_costs,3))+', cumulative_discounted_storage_energy:'+str(np.round(cumulative_discounted_storage_energy,3)))
+        print('LCUE:'+str(np.round(LCUE,3))+', emissions intensity:'+str(np.round(emissions_intensity,3)))
         return system_outputs
 #%%
 # =============================================================================
@@ -821,7 +839,6 @@ class Optimisation():
         max_storage = optimisation_results['Initial storage size'].iloc[-1]
         max_diesel = optimisation_results['Diesel capacity'].iloc[-1]
         LCUE = optimisation_results['LCUE ($/kWh)'].iloc[-1]
-        LCSE = optimisation_results['LCSE ($/kWh)'].iloc[-1]
         emissions_intensity = optimisation_results['Emissions intensity (gCO2/kWh)'].iloc[-1]
         total_GHGs = optimisation_results['Cumulative GHGs (kgCO2eq)'].iloc[-1]
         total_system_GHGs = optimisation_results['Cumulative system GHGs (kgCO2eq)'].iloc[-1]
@@ -836,7 +853,6 @@ class Optimisation():
         grid_energy = np.sum(optimisation_results['Grid energy (kWh)'])
         diesel_energy = np.sum(optimisation_results['Diesel energy (kWh)'])
         discounted_energy = np.sum(optimisation_results['Discounted energy (kWh)'])
-        discounted_storage_energy = np.sum(optimisation_results['Discounted storage energy (kWh)'])
         diesel_fuel_usage = np.sum(optimisation_results['Diesel fuel usage (l)'])
         total_cost = np.sum(optimisation_results['Total cost ($)'])
         total_system_cost = np.sum(optimisation_results['Total system cost ($)'])
@@ -868,7 +884,6 @@ class Optimisation():
                                 'Maximum storage size':max_storage,
                                 'Maximum diesel capacity':max_diesel,
                                 'LCUE ($/kWh)':LCUE,
-                                'LCSE ($/kWh)':LCSE,
                                 'Emissions intensity (gCO2/kWh)':emissions_intensity,
                                 'Blackouts':blackouts,
                                 'Unmet fraction':unmet_fraction,
@@ -883,7 +898,6 @@ class Optimisation():
                                 'Grid energy (kWh)':grid_energy,
                                 'Diesel energy (kWh)':diesel_energy,
                                 'Discounted energy (kWh)':discounted_energy,
-                                'Discounted storage_energy (kWh)':discounted_storage_energy,
                                 'Total cost ($)':total_cost,
                                 'Total system cost ($)':total_system_cost,
                                 'New equipment cost ($)':new_equipment_cost,

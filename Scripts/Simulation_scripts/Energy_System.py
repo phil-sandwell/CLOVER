@@ -29,13 +29,15 @@ from Load import Load
 #%%
 class Energy_System():
     def __init__(self,**kwargs):
+        self.kwargs = kwargs
         self.location = kwargs.get('location')
         self.CLOVER_filepath = '.'
         self.location_filepath = self.CLOVER_filepath + '/Locations/' + self.location
         self.generation_filepath = self.location_filepath + '/Generation/'
         self.location_data_filepath = self.location_filepath + '/Location Data/'
         self.energy_system_filepath = self.location_filepath + '/Simulation/Energy system inputs.csv'
-        self.energy_system_inputs = pd.read_csv(self.energy_system_filepath,header=None,index_col=0).round(decimals=3)
+        #self.energy_system_inputs = pd.read_csv(self.energy_system_filepath,header=None,index_col=0).round(decimals=3)
+        self.energy_system_inputs = pd.read_csv(self.location_filepath + '/Simulation/Energy system inputs.csv' ,header=None,index_col=0).round(decimals=3)
         # Replace input values with keywords if specified
         if kwargs.get('energy_system_inputs'):
             for i in kwargs.get('energy_system_inputs'):
@@ -43,7 +45,8 @@ class Energy_System():
                     print("Couldn't find entry",i[0],"in energy_system_inputs. Perhaps it's misspelt in kwargs? Printing list of possible variables and exiting.")
                     print(self.energy_system_inputs.index)
                     exit(1)
-            self.energy_system_inputs[i[0]] = i[1]
+                self.energy_system_inputs.at[i[0],1] = i[1] # There is inconsistency in how inputs are imported in different CLOVER scripts, which leads to the form of this line changing between scripts. Where there is a '[1]' at the end of import line (as ineg. finance_imputs), the 'at' function is not required. where there is no [1] (as in energy_system_inputs), the at function is required.
+                print('Amended ' + str(i[0]) + ' in self.energy_system_inputs to ' + str(self.energy_system_inputs.at[i[0],1]) + ' based on kwargs')
         self.scenario_inputs = pd.read_csv(self.location_filepath + '/Scenario/Scenario inputs.csv' ,header=None,index_col=0).round(decimals=3)
         # Replace input values with keywords if specified
         if kwargs.get('scenario_inputs'):
@@ -52,11 +55,13 @@ class Energy_System():
                     print("Couldn't find entry",i[0],"in scenario_inputs. Perhaps it's misspelt in kwargs? Printing list of possible variables and exiting.")
                     print(self.scenario_inputs.index)
                     exit(1)
-            self.scenario_inputs[i[0]] = i[1]
+                self.scenario_inputs.at[i[0],1] = i[1]
+        # Allow manual override of name of load file - useful for comparing externally generated different loads for otherwise similar locations (used in 2020 demand paper)
+        self.total_load_file=kwargs.get('load_override','total_load.csv')
         self.kerosene_data_filepath = self.location_filepath + '/Load/Devices in use/kerosene_in_use.csv'
         self.kerosene_usage = pd.read_csv(self.kerosene_data_filepath, index_col = 0).reset_index(drop=True)
         self.simulation_storage = self.location_filepath + '/Simulation/Saved simulations/'
-
+        self.auto_recharge_batt = kwargs.get('auto_recharge_batt','FALSE') # If 'TRUE', then automatically recharge batteries from diesel generator when charge falls below min charge - assumes this is possible in 1 hour. If 'FALSE', CLOVER default of meeting load with diesel and not recharging batteries.
 #%%
 # =============================================================================
 # SIMULATION FUNCTIONS
@@ -119,7 +124,7 @@ class Energy_System():
         grid_energy = pd.DataFrame(input_profiles['Grid energy (kWh)']).abs()
         storage_profile = pd.DataFrame(input_profiles['Storage profile (kWh)'])
         kerosene_profile = pd.DataFrame(input_profiles['Kerosene lamps'])
-        households = pd.DataFrame(Load(kwargs).population_hourly()[start_year*8760:end_year*8760].values)
+        households = pd.DataFrame(Load(**self.kwargs).population_hourly()[start_year*8760:end_year*8760].values)
            
 #   Initialise battery storage parameters 
         max_energy_throughput = storage_size * self.energy_system_inputs[1]['Battery cycle lifetime']
@@ -144,8 +149,10 @@ class Energy_System():
         energy_surplus = []
         energy_deficit = []
         storage_power_supplied = []
+        storage_boosts = [] # Added for auto-recharge
    
 #   Begin simulation, iterating over timesteps
+        print('\nRunning simulation with PV size '+str(PV_size)+', storage size '+str(storage_size)+', start year '+str(start_year)+', end year '+ str(end_year))
         for t in range(0,int(storage_profile.size)):  
 #   Check if any storage is being used
             if storage_size == 0:
@@ -173,7 +180,17 @@ class Energy_System():
             if new_hourly_storage >= max_storage:
                 new_hourly_storage = max_storage
             elif new_hourly_storage <= min_storage:
-                new_hourly_storage = min_storage          
+                if self.auto_recharge_batt == 'FALSE':
+                    new_hourly_storage = min_storage
+                else: # Added this option to automaticaally fully recharge the battery from diesel if it goes below a given threshold.
+                    print('Stored energy dropping to'+str(new_hourly_storage)+', which is less than the threshold, '+str(min_storage)+'. Using generator to recharge battery.')
+                    print('Changing energy in storage from'+str(new_hourly_storage)+' to max storage, '+str(max_storage)+'.')
+                    print('Changing energy deficit for this hour from '+str(energy_deficit[t])+' to '+str(max_storage - new_hourly_storage)+'.')
+                    energy_deficit[t] = max_storage - new_hourly_storage
+                    new_hourly_storage = max_storage
+
+
+
 #   Update hourly_storage
             hourly_storage.append(new_hourly_storage)  
                 
@@ -196,15 +213,19 @@ class Energy_System():
         storage_power_supplied = pd.DataFrame(storage_power_supplied)
 
 #   Find unmet energy
-        unmet_energy = pd.DataFrame((load_energy.values - renewables_energy_used_directly.values
+        if self.auto_recharge_batt == 'FALSE': 
+            unmet_energy = pd.DataFrame((load_energy.values - renewables_energy_used_directly.values
                                     - grid_energy.values - storage_power_supplied.values))    
+        else:
+            unmet_energy = pd.DataFrame(energy_deficit) # Amended here such that unmet energy is only recorded (& diesel gen only comes on) when the battery has been auto-recharged  
+
         blackout_times = ((unmet_energy > 0) * 1).astype(float)
 
 #   Use backup diesel generator
         if diesel_backup_status == "Y":
-            diesel_energy, diesel_times = Diesel(kwargs).get_diesel_energy_and_times(unmet_energy,blackout_times,diesel_backup_threshold)
+            diesel_energy, diesel_times = Diesel(**self.kwargs).get_diesel_energy_and_times(unmet_energy,blackout_times,diesel_backup_threshold)
             diesel_capacity = math.ceil(np.max(diesel_energy))
-            diesel_fuel_usage = pd.DataFrame(Diesel(kwargs).get_diesel_fuel_usage(
+            diesel_fuel_usage = pd.DataFrame(Diesel(**self.kwargs).get_diesel_fuel_usage(
                     diesel_capacity,diesel_energy,diesel_times).values)
             unmet_energy = pd.DataFrame(unmet_energy.values - diesel_energy.values)
             diesel_energy = diesel_energy.abs()
@@ -252,7 +273,7 @@ class Energy_System():
                                        'End year':float(end_year),
                                        'Initial PV size':PV_size,
                                        'Initial storage size':storage_size,
-                                       'Final PV size':PV_size*Solar(kwargs).solar_degradation()[0][8760*(end_year-start_year)],
+                                       'Final PV size':PV_size*Solar(**self.kwargs).solar_degradation()[0][8760*(end_year-start_year)],
                                        'Final storage size':storage_size*np.min(battery_health['Battery health']),
                                        'Diesel capacity':diesel_capacity
                                        },index=['System details'])
@@ -296,7 +317,7 @@ class Energy_System():
         Function:
             Saves simulation outputs to a .csv file
         Inputs:
-            simulation_name     DataFrame output from Energy_System(kwargs).simulation(...)
+            simulation_name     DataFrame output from Energy_System(**self.kwargs).simulation(...)
             filename            Name of .csv file to be saved as (defaults to timestamp)
         Outputs:
             Simulation saved to .csv file
@@ -374,7 +395,7 @@ class Energy_System():
         
 #   Initialise power generation, including degradation of PV
         PV_generation = PV_size * pd.DataFrame(self.get_PV_generation()[start_hour:end_hour].values 
-                                     * Solar(kwargs).solar_degradation()[0:(end_hour-start_hour)].values)
+                                     * Solar(**self.kwargs).solar_degradation()[0:(end_hour-start_hour)].values)
         grid_status = pd.DataFrame(self.get_grid_profile()[start_hour:end_hour].values)
         load_profile = pd.DataFrame(self.get_load_profile()[start_hour:end_hour].values)
         
@@ -464,7 +485,7 @@ class Energy_System():
         Outputs:
             Gives a dataframe with columns for the load of domestic, commercial and public devices
         '''
-        loads = pd.read_csv(self.location_filepath + '/Load/Device load/total_load.csv',index_col=0)*0.001
+        loads = pd.read_csv(self.location_filepath + '/Load/Device load/' + self.total_load_file,index_col=0)*0.001
         total_load = pd.DataFrame(np.zeros(len(loads)))
         if self.scenario_inputs[1]['Domestic'] == 'Y':
             total_load = pd.DataFrame(total_load.values + pd.DataFrame(loads['Domestic']).values)

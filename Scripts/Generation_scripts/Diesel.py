@@ -33,8 +33,8 @@ class Diesel():
                     print("Couldn't find entry",i[0],"in diesel_inputs. Perhaps it's misspelt in kwargs? Printing list of possible variables and exiting.")
                     print(self.diesel_inputs.index)
                     exit(1)
-            self.diesel_inputs[i[0]] = i[1]
-
+                self.diesel_inputs.at[i[0]] = i[1]
+        self.efficient_diesel = kwargs.get('efficient_diesel','FALSE')
 #%%       
 #   Energy threshold, above which the generator should switch on
     def find_deficit_threshold(self,unmet_energy,blackouts,backup_threshold):
@@ -95,9 +95,10 @@ class Diesel():
         diesel_minimum_load = float(self.diesel_inputs[1]['Diesel minimum load'])
         capacity = float(capacity)
         load_factor = diesel_energy / capacity
-        above_minimum = load_factor * (load_factor > diesel_minimum_load)
-        below_minimum = diesel_minimum_load * (load_factor <= diesel_minimum_load)
-        load_factor = pd.DataFrame(above_minimum.values + below_minimum.values) * diesel_times
+        if self.efficient_diesel == 'FALSE':
+            above_minimum = load_factor * (load_factor > diesel_minimum_load)
+            below_minimum = diesel_minimum_load * (load_factor <= diesel_minimum_load)
+            load_factor = pd.DataFrame(above_minimum.values + below_minimum.values) * diesel_times
         fuel_usage = load_factor * capacity * diesel_consumption
         fuel_usage = fuel_usage.astype(float)
         return fuel_usage # in litres

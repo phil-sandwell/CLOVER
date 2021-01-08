@@ -36,7 +36,8 @@ class Load():
                     print("Couldn't find entry",i[0],"in location_inputs. Perhaps it's misspelt in kwargs? Printing list of possible variables and exiting.")
                     print(self.location_inputs.index)
                     exit(1)
-            self.location_inputs[i[0]] = i[1]
+                self.location_inputs[i[0]] = i[1]
+        self.location_inputs['Location'] = self.location
         self.device_filepath = self.location_filepath + '/Load/'
         self.device_ownership_filepath = self.device_filepath + '/Device ownership/'
         self.device_inputs = pd.read_csv(self.device_filepath + 'Devices.csv')
@@ -47,10 +48,14 @@ class Load():
                     print("Couldn't find entry",i[0],"in device_inputs. Perhaps it's misspelt in kwargs? Printing list of possible variables and exiting.")
                     print(self.device_inputs.index)
                     exit(1)
-            self.device_inputs[i[0]] = i[1]
+                self.device_inputs.at[i[0],1] = i[1]
         self.device_utilisation_filepath = self.device_filepath + '/Device utilisation/'
         self.device_usage_filepath = self.device_filepath + '/Devices in use/'
         self.device_load_filepath = self.device_filepath + 'Device load/'
+        self.no_commercial_scaling = kwargs.get('no_commercial_scaling','FALSE') # SF: I added this to consider different community sizes with the same commercial load.
+        self.no_public_scaling = kwargs.get('no_public_scaling','FALSE') # SF: I added this to consider different community sizes with the same public load.
+        self.baseline_load = kwargs.get('baseline_load','FALSE') # SF: I added this to consider different community sizes with the same commercial load.
+
 
 # =============================================================================
 #       Calculate the load of devices in the community
@@ -65,11 +70,16 @@ class Load():
         Outputs:
             Gives a .csv file with columns for the load of domestic and 
             commercial devices to be used in later simulations and a .csv file
-            of the load statistics from Load(kwargs).yearly_load_statistics(...)
+            of the load statistics from Load(**self.kwargs).yearly_load_statistics(...)
         """
         domestic_load = pd.DataFrame(np.zeros((int(self.location_inputs['Years'])*365*24, 1)))
         commercial_load = pd.DataFrame(np.zeros((int(self.location_inputs['Years'])*365*24, 1)))
         public_load = pd.DataFrame(np.zeros((int(self.location_inputs['Years'])*365*24, 1)))
+
+        if self.baseline_load != 'FALSE': # If specified, add baseline load
+            add_load = pd.read_csv(self.device_load_filepath + self.baseline_load + '_load.csv', index_col = 0).reset_index(drop=True)
+            commercial_load = pd.DataFrame(commercial_load.values + add_load.values)
+
         for i in range(len(self.device_inputs)):
             device_info = self.device_inputs.iloc[i]
             if device_info['Type'] == 'Domestic':
@@ -81,6 +91,7 @@ class Load():
             elif device_info['Type'] == 'Public':
                 add_load = pd.read_csv(self.device_load_filepath + device_info['Device'] + '_load.csv', index_col = 0).reset_index(drop=True)
                 public_load = pd.DataFrame(public_load.values + add_load.values)
+
         total_load = pd.concat([domestic_load,commercial_load,public_load],axis=1)
         total_load.columns = ["Domestic", "Commercial", "Public"]
         total_load.to_csv(self.device_load_filepath + 'total_load.csv')
@@ -202,11 +213,18 @@ class Load():
             if device_info['Available']=='Y':
                 init,fin,inno,imit = device_info[3:7]
                 pop = self.population_growth_daily()
-                if fin != init:
-                    cum_sales = self.cumulative_sales_daily(init,fin,inno,imit)
-                    daily_ownership = pd.DataFrame(np.floor(cum_sales * pop))
+                if (device_info['Type']=='Commercial' and self.no_commercial_scaling=='TRUE') or (device_info['Type']=='Public' and self.no_public_scaling=='TRUE') : # SF: I added this to consider different community sizes with the same pcommercial load.
+                    if fin != init:
+                        cum_sales = self.cumulative_sales_daily(init,fin,inno,imit)
+                        daily_ownership = pd.DataFrame(np.floor(cum_sales))
+                    else:
+                        daily_ownership = pd.DataFrame(np.floor(pop * init/pop))
                 else:
-                    daily_ownership = pd.DataFrame(np.floor(pop * init))
+                    if fin != init:
+                        cum_sales = self.cumulative_sales_daily(init,fin,inno,imit)
+                        daily_ownership = pd.DataFrame(np.floor(cum_sales * pop))
+                    else:
+                        daily_ownership = pd.DataFrame(np.floor(pop * init))
             elif device_info['Available']=='N':
                 daily_ownership = pd.DataFrame(np.zeros((int(self.location_inputs['Years'])*365, 1)))
             daily_ownership.to_csv(self.device_ownership_filepath + device_info['Device'] + '_daily_ownership.csv')

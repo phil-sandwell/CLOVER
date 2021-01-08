@@ -35,7 +35,7 @@ class Solar():
                     print("Couldn't find entry",i[0],"in location_inputs. Perhaps it's misspelt in kwargs? Printing list of possible variables and exiting.")
                     print(self.location_inputs.index)
                     exit(1)
-            self.location_inputs[i[0]] = i[1]
+                self.location_inputs.at[i[0],1] = i[1]
 #%%
     def total_solar_output(self,start_year=2007):
         """
@@ -62,7 +62,7 @@ class Solar():
         lifetime = self.input_data.loc['lifetime']
         hourly_degradation = 0.20/(lifetime * 365 * 24)
         lifetime_degradation = []
-        for i in range((20*365*24)+1):
+        for i in range(20*365*24):
             equiv = 1.0 - i * hourly_degradation
             lifetime_degradation.append(equiv)
         return pd.DataFrame(lifetime_degradation)

@@ -34,7 +34,8 @@ class Finance():
                     print("Couldn't find entry",i[0],"in location_inputs. Perhaps it's misspelt in kwargs? Printing list of possible variables and exiting.")
                     print(self.location_inputs.index)
                     exit(1)
-            self.location_inputs[i[0]] = i[1]
+                self.location_inputs[i[0]] = i[1]
+        self.location_inputs['Location'] = self.location
         self.finance_filepath = self.location_filepath + '/Impact/Finance inputs.csv'
         self.finance_inputs = pd.read_csv(self.finance_filepath,header=None,index_col=0).round(decimals=3)[1]
         # Replace input values with keywords if specified
@@ -44,8 +45,10 @@ class Finance():
                     print("Couldn't find entry",i[0],"in finance_inputs. Perhaps it's misspelt in kwargs? Printing list of possible variables and exiting.")
                     print(self.finance_inputs.index)
                     exit(1)
-            self.finance_inputs[i[0]] = i[1]
-        self.inverter_inputs = pd.read_csv(self.location_filepath + '/Load/Device load/yearly_load_statistics.csv',index_col=0)
+                self.finance_inputs[i[0]] = i[1]
+
+        self.yearly_load_statistics_file=kwargs.get('yearly_load_stats_override','yearly_load_statistics.csv')
+        self.inverter_inputs = pd.read_csv(self.location_filepath + '/Load/Device load/' + self.yearly_load_statistics_file ,index_col=0)
 
 #%%
 #==============================================================================
@@ -181,12 +184,27 @@ class Finance():
         discount_fraction = (1.0 - self.finance_inputs.loc['Discount rate'])**year
         return undiscounted_cost * discount_fraction
 
+    def discounted_storage_cost(self,storage_size,year=0):
+        '''
+        Function:
+            Calculates discounted cost of storage
+        Inputs:
+            storage_size        Capacity of battery storage being installed
+            year                Installation year
+        Outputs:
+            Discounted cost 
+        '''  
+        undiscounted_cost = self.get_storage_cost(storage_size,year)
+        discount_fraction = (1.0 - self.finance_inputs.loc['Discount rate'])**year
+        return undiscounted_cost * discount_fraction
+
+
     def get_connections_expenditure(self,households,year=0):
         '''
         Function:
             Calculates cost of connecting households to the system
         Inputs:
-            households          DataFrame of households from Energy_System(kwargs).simulation(...)
+            households          DataFrame of households from Energy_System(**self.kwargs).simulation(...)
             year                Installation year
         Outputs:
             Discounted cost 
@@ -303,7 +321,7 @@ class Finance():
         Function:
             Calculates cost of kerosene usage
         Inputs:
-            kerosene_lamps_in_use_hourly        Output from Energy_System(kwargs).simulation(...)
+            kerosene_lamps_in_use_hourly        Output from Energy_System(**self.kwargs).simulation(...)
             start_year                          Start year of simulation period
             end_year                            End year of simulation period
         Outputs:
@@ -319,7 +337,7 @@ class Finance():
         Function:
             Calculates cost of kerosene usage that has been avoided by using the system
         Inputs:
-            kerosene_lamps_mitigated_hourly     Output from Energy_System(kwargs).simulation(...)
+            kerosene_lamps_mitigated_hourly     Output from Energy_System(**self.kwargs).simulation(...)
             start_year                          Start year of simulation period
             end_year                            End year of simulation period
         Outputs:
@@ -335,7 +353,7 @@ class Finance():
         Function:
             Calculates cost of grid electricity used by the system
         Inputs:
-            grid_energy_hourly                  Output from Energy_System(kwargs).simulation(...)
+            grid_energy_hourly                  Output from Energy_System(**self.kwargs).simulation(...)
             start_year                          Start year of simulation period
             end_year                            End year of simulation period
         Outputs:
@@ -351,7 +369,7 @@ class Finance():
         Function:
             Calculates cost of diesel fuel used by the system
         Inputs:
-            diesel_fuel_usage_hourly            Output from Energy_System(kwargs).simulation(...)
+            diesel_fuel_usage_hourly            Output from Energy_System(**self.kwargs).simulation(...)
             start_year                          Start year of simulation period
             end_year                            End year of simulation period
         Outputs:
