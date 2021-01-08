@@ -21,7 +21,7 @@ class Diesel():
     def __init__(self): 
         self.size = 1
         self.location = 'Bahraich'
-        self.CLOVER_filepath = '/***YOUR LOCAL FILE PATH***/CLOVER 4.0'
+        self.CLOVER_filepath = '.'
         self.location_filepath = self.CLOVER_filepath + '/Locations/' + self.location
         self.generation_filepath = self.location_filepath + '/Generation/'
         self.diesel_filepath = self.generation_filepath + 'Diesel/Diesel inputs.csv'
