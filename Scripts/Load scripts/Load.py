@@ -20,13 +20,13 @@ import numpy as np
 import math
 
 import sys
-sys.path.insert(0, './Scripts/Conversion scripts')
+sys.path.insert(0, '/***YOUR LOCAL FILE PATH***/CLOVER/Scripts/Conversion scripts')
 from Conversion import Conversion
 
 class Load():
     def __init__(self):
         self.location = 'Bahraich'
-        self.CLOVER_filepath = '.'
+        self.CLOVER_filepath = '/***YOUR LOCAL FILE PATH***/CLOVER'
         self.location_filepath = self.CLOVER_filepath + '/Locations/' + self.location
         self.location_inputs = pd.read_csv(self.location_filepath + '/Location Data/Location inputs.csv',header=None,index_col=0)[1]
         self.device_filepath = self.location_filepath + '/Load/'
