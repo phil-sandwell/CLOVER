@@ -1,0 +1,11 @@
+PV,Y,(Y/N)
+Battery,Y,(Y/N)
+Diesel backup,N,(Y/N)
+Diesel backup threshold,0.1,Maximum acceptible blackouts (0.0-1.0)
+Grid,N,(Y/N)
+Grid type,none,Grid profile
+Prioritise self generation,Y,(Y/N)
+Domestic,Y,(Y/N)
+Commercial,Y,(Y/N)
+Public,Y,(Y/N)
+Distribution network,AC,DC or AC distribution network

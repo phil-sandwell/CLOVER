@@ -1,0 +1,13 @@
+Scenario length,20,years,
+Iteration length,4,years,
+PV size (min),400,kWp,
+PV size (max),1800,kWp,
+PV size (step),25,kWp,
+PV size (increase),25,kWp,Set to 0 to ignore
+Storage size (min),0,kWh,
+Storage size (max),4000,kWh,
+Storage size (step),50,kWh,
+Storage size (increase),50,kWh,Set to 0 to ignore
+Threshold criterion,Unmet energy fraction,Name of column from appraisal,
+Threshold value,0.1,Max/min value permitted (see guidance),
+Optimisation criterion,LCUE ($/kWh),Name of column from appraisal,

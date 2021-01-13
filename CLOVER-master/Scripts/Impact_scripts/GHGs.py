@@ -57,8 +57,8 @@ class GHGs():
                     print(self.finance_inputs.index)
                     exit(1)
                 self.finance_inputs[i[0]] = i[1]
-        self.yearly_load_statistics_file=kwargs.get('yearly_load_stats_override','yearly_load_statistics.csv')
-        self.inverter_inputs = pd.read_csv(self.location_filepath + '/Load/Device load/' + self.yearly_load_statistics_file ,index_col=0)
+        self.inverter_inputs = pd.read_csv(self.location_filepath + '/Load/Device load/yearly_load_statistics.csv',index_col=0)
+
 #%%
 #==============================================================================
 #   EQUIPMENT GHGs

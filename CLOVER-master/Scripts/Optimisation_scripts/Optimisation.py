@@ -657,7 +657,7 @@ class Optimisation():
         total_GHGs = equipment_GHGs + connections_GHGs + OM_GHGs + diesel_GHGs + grid_GHGs + kerosene_GHGs
         total_system_GHGs = equipment_GHGs + connections_GHGs + OM_GHGs + diesel_GHGs + grid_GHGs
 #   Return outputs        
-        system_outp${load_scenario}uts['Total GHGs (kgCO2eq)'] = total_GHGs
+        system_outputs['Total GHGs (kgCO2eq)'] = total_GHGs
         system_outputs['Total system GHGs (kgCO2eq)'] = total_system_GHGs
         system_outputs['New equipment GHGs (kgCO2eq)'] = equipment_GHGs
         system_outputs['New connection GHGs (kgCO2eq)'] = connections_GHGs

@@ -1,0 +1,9 @@
+Location,Bhinjpur,Location name
+Country,India,Location country
+Time difference,5.5,Time difference vs. UTC
+Community size,93,Number of households in community
+Community growth rate,0.01,Fractional growth rate per year
+Years,20,years of simulation
+Latitude,22.77861111,degrees of latitude (North +ve)
+Longitude,84.40444444,degrees of longitude (East +ve)
+token,25c7863d3466f5ba421244bfe312c5aae790ad89,renewables.ninja API token
