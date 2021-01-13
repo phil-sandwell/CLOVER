@@ -9,7 +9,7 @@ Version adapted for use on Imperial College's High Performance Computing service
 
 2) Open a bash terminal window and navigate to the github repository (if using mac/linux, otherwise will need to use another method to copy scripts to, and send commands on, the hpc)
 
-3) Copy the modified version of CLOVER for the HPC to your account in the directory /home/USERNAME/. 
+3) Add your renewables.ninja API to the location file for Bhinjpur, then copy the modified version of CLOVER for the HPC to your account in the directory /home/USERNAME/. 
 
 	scp -r CLOVER-master USERNAME@login.cx1.hpc.ic.ac.uk:/home/USERNAME/CLOVER-master
 
@@ -39,7 +39,7 @@ Version adapted for use on Imperial College's High Performance Computing service
 	scp -r Job_2/ USERNAME@login.cx1.hpc.ic.ac.uk:/home/USERNAME/CLOVER-master/Jobs
 
 
-9) If necessary, generate load data - this is necessary for the included example job.  (This isn’t the best practice - this should really be done on nodes set up for running jobs rather than that you’re interacting with to avoid slowing it down for other users - but not so bad as long as it’s only for a few locations). Scripts to do this for other locations can be made by adapting the included script for the example location. From hpc:
+9) If necessary, generate load and solar data - this is necessary for the included example job.  (This isn’t the best practice - this should really be done on nodes set up for running jobs rather than that you’re interacting with to avoid slowing it down for other users - but not so bad as long as it’s only for a few locations). Scripts to do this for other locations can be made by adapting the included script for the example location. From hpc:
 
 	cd /home/USERNAME/CLOVER-master
 	module load anaconda3/personal
