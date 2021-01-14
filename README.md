@@ -29,43 +29,44 @@ Generally, these changes shouldn't afffect the ability of pre-existing CLOVER jo
 
 2) Log on to hpc (using a terminal/bash if using mac/linux, or equivalent on pc). Make relevant directories. (NB. 'USERNAME' should be replaced with yor username)
 	
-	ssh USERNAME@login.cx1.hpc.ic.ac.uk
-	mkdir /work/USERNAME/CLOVER-hpc/
-	mkdir /work/USERNAME/CLOVER-hpc/Core_files/
-	mkdir /work/USERNAME/CLOVER-hpc/Jobs/
+
+        ssh USERNAME@login.cx1.hpc.ic.ac.uk
+        mkdir /work/USERNAME/CLOVER-hpc/
+        mkdir /work/USERNAME/CLOVER-hpc/Core_files/
+        mkdir /work/USERNAME/CLOVER-hpc/Jobs/
 
 3) Import CLOVER-hpc and example jobs from Github. (NB. 'USERNAME' should be replaced with yor username)
 
-	cd /work/USERNAME/CLOVER-hpc/Core_files/
-	git clone -b CLOVER-hpc https://github.com/sheridanfew/CLOVER.git .
-	cd /work/USERNAME/CLOVER-hpc/Jobs/
-	git clone https://github.com/sheridanfew/CLOVER-hpc-job-example.git .
+        cd /work/USERNAME/CLOVER-hpc/Core_files/
+        git clone -b CLOVER-hpc https://github.com/sheridanfew/CLOVER.git .
+        cd /work/USERNAME/CLOVER-hpc/Jobs/
+        git clone https://github.com/sheridanfew/CLOVER-hpc-job-example.git .
 
 4) Add your renewables.ninja API to the location file for Bhinjpur, using vi from hpc command line or a different text editor (NB. This should go in the middle of the final line: token,(YOUR_API_TOKEN,renewables.ninja API token')
 
-	vi /work/USERNAME/CLOVER-hpc/Core_files/Locations/Bhinjpur/Location\ Data/Location\ inputs.csv
+        vi /work/USERNAME/CLOVER-hpc/Core_files/Locations/Bhinjpur/Location\ Data/Location\ inputs.csv
 
 5) Run set of commands to set up CLOVER python environment containing necessary packages: (NB. May need to copy and paste commands within 'HPC_setup.sh' to command line on the hpc if this doesn't work)
 
-	cd /work/USERNAME/CLOVER-hpc/Core_files/
-	chmod +x ./HPC_setup.sh
-	./HPC_setup.sh
+        cd /work/USERNAME/CLOVER-hpc/Core_files/
+        chmod +x ./HPC_setup.sh
+        ./HPC_setup.sh
 
 6) Make the launch file executable and move it to your 'bin', from which it can be called from any location.
 
-	cd /work/USERNAME/CLOVER-hpc/Core_files/
-	chmod +x ./launch_CLOVER_job_multi_share.sh
-	mv launch_CLOVER_job_multi_share.sh ~/bin/
+        cd /work/USERNAME/CLOVER-hpc/Core_files/
+        chmod +x ./launch_CLOVER_job_multi_share.sh
+        mv launch_CLOVER_job_multi_share.sh ~/bin/
 
 
 ## For each job
 
 7) If necessary, generate load and solar data - this is necessary for the included example job.  (This isn’t the best practice - this should really be done on nodes set up for running jobs rather than that you’re interacting with to avoid slowing it down for other users - but I think not so bad for only for a few locations). Scripts to do this for other locations can be made by adapting the included script for the example location. From hpc:
 
-	cd /work/USERNAME/CLOVER-hpc/Core_files/
-	module load anaconda3/personal
-	source activate CLOVER
-	python Load_Solar_Bhinjpur.py 
+        cd /work/USERNAME/CLOVER-hpc/Core_files/
+        module load anaconda3/personal
+        source activate CLOVER
+        python Load_Solar_Bhinjpur.py 
 
 8) Navigate to Jobs directory and send your CLOVER jobs to be run!
 
@@ -79,14 +80,14 @@ You can get help/check what each option does by running ../Core_files/launch_CLO
 More generally, this script can be used to run up to 8 jobs simultaneously using the following command:
 
 	cd /work/USERNAME/CLOVER-hpc/Jobs/
-	aunch_CLOVER_job_multi_share.sh -j UNIQUE_NAME_FOR_THIS_SET_OF_JOBS JOB1/JOB1.py JOB2/JOB2.py ... JOB8/JOB8.py 
+	launch_CLOVER_job_multi_share.sh -j UNIQUE_NAME_FOR_THIS_SET_OF_JOBS JOB1/JOB1.py JOB2/JOB2.py ... JOB8/JOB8.py 
 
 
 9) Wait for the job to finish. You can check the status of your job with the command 'qstat'. It will disappear from the queue when it has completed. The launch_CLOVER_job.sh script is currently set up to email you when a job's finished too. Easy to remove the line doing this from the launch script if it becomes a pain. Once the job is completed, results should appear in the folder /home/USERNAME/CLOVER-master/Results.
 
 10) Copy results back to a convenient directory on your own computer when the job is finished. From a bash terminal in a convenient directory:
 
-	scp -r USERNAME@login.cx1.hpc.ic.ac.uk:/work/USERNAME/CLOVER-hpc/Results/NAME_OF_YOUR_JOB/ .
+        scp -r USERNAME@login.cx1.hpc.ic.ac.uk:/work/USERNAME/CLOVER-hpc/Results/NAME_OF_YOUR_JOB/ .
 
 For the example:
 
