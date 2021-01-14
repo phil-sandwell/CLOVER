@@ -42,7 +42,7 @@ Generally, these changes shouldn't afffect the ability of pre-existing CLOVER jo
         cd /work/USERNAME/CLOVER-hpc/Jobs/
         git clone https://github.com/sheridanfew/CLOVER-hpc-job-example.git .
 
-4) Add your renewables.ninja API to the location file for Bhinjpur, using vi from hpc command line or a different text editor (NB. This should go in the middle of the final line: token,(YOUR_API_TOKEN,renewables.ninja API token')
+4) Add your renewables.ninja API to the location file for Bhinjpur, using vi from hpc command line or a different text editor (NB. This should go in the middle of the final line: token,(YOUR_API_TOKEN),renewables.ninja API token'
 
         vi /work/USERNAME/CLOVER-hpc/Core_files/Locations/Bhinjpur/Location\ Data/Location\ inputs.csv
 
