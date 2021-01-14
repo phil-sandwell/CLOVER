@@ -118,6 +118,7 @@ do
  fi
  
 mkdir ${BASENAME}/
+mkdir ${BASENAME}/Jobs/
  cp -r CLOVER/* ${BASENAME}
  mkdir -p ${CLOVER_PATH}/Results/$BASENAME
 
