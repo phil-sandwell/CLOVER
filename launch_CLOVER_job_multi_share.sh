@@ -150,7 +150,7 @@ rm tail.sh
 # Add final commands to script
 cat >> ${JOBNAME}.sh << EOF
 
-mail -s "HPC Job Done: ${JOBNAME}" spf310@imperial.ac.uk <<< 'Hooray!'
+mail -s "HPC Job Done: ${JOBNAME}" ${USERNAME}@imperial.ac.uk <<< 'Hooray!'
 
 echo "Job finished:"
 date
@@ -165,3 +165,4 @@ EOF
  qsub -q "${QUEUE}" ${JOBNAME}.sh
 
 exit 0
+
