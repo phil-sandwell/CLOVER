@@ -15,7 +15,7 @@ function USAGE()
 Sheridan's script to launch multiple CLOVER jobs, following Jarv's .com launcher.
 
 Launching multiple CLOVER jobs allows efficient use of the multiple processors on nodes to which jobs are submitted. The number of jobs launched should ideally equal the number of processors requested. 
-These jobs must contain the a line 'location=LOCATION_NAME_HERE' in the first few lines so that the script knows where to get Location details from.cp -r ${CLOVER_PATH}//Locations/$LOCATION/ CLOVER/Locations/
+These jobs must contain the a line 'location=LOCATION_NAME_HERE' in the first few lines so that the script knows where to get Location details from.cp -r ${CLOVER_PATH}/Core_files/Locations/$LOCATION/ CLOVER/Locations/
 
 USAGE: ./launch_CLOVER_job.sh [-nm] -j COLLECTIVE_NAME Job1.py Job2.py Job3.py ...
 
@@ -98,7 +98,7 @@ cd tmp_jobdir
 
 # Copy over necessary files
 mkdir CLOVER/
-cp -r ${CLOVER_PATH}/Scripts CLOVER/
+cp -r ${CLOVER_PATH}/Core_files/Scripts CLOVER/
 mkdir CLOVER/Locations
 mkdir Jobs
 EOF
@@ -114,7 +114,7 @@ do
    cat >> ${JOBNAME}.sh << EOF
  if [ ! -d CLOVER/Locations/$LOCATION/ ]
   then
-  cp -r ${CLOVER_PATH}/Locations/$LOCATION/ CLOVER/Locations/
+  cp -r ${CLOVER_PATH}/Core_files/Locations/$LOCATION/ CLOVER/Locations/
  fi
  
 mkdir ${BASENAME}/
