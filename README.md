@@ -11,15 +11,15 @@ This version of CLOVER has been adapted to facilitate bulk running of jobs on Im
 
 ∙ Scripts have been adapted such that they can take keyword arguments (kwargs) to override parameter values specified in location inputs. This facilitates exploration of different input values without defining new locations (or manually editing existing ones) for each value considered.
 
-∙ A "Jobs"* folder is added, including a number of example jobs which can be submitted to the HPC. 
+∙ A "Jobs"\* folder is added, including a number of example jobs which can be submitted to the HPC. 
 
 ∙ A launch script is added, which can be used to launch the above jobs (or other jobs depending on commands passed to this script)
 
-∙ A "Results"* folder is added, to which results of simulations and optimisations performed on the hpc are returned.
+∙ A "Results"\* folder is added, to which results of simulations and optimisations performed on the hpc are returned.
 
 ∙ Spaces are replaced with underscores in paths to scripts (this avoids some complication in copying files to and from the hpc, and mass processing of scripts). Not a major change per se, but github is not able to recognise files after this change, making merging branches a bit trickier. Could be partly overcome by temporarily reverting the names of these paths.
 
-* "Jobs" and "Results" folders are kept outside of the main github repository, with the idea that these will  not interact with github updates. Ideally "Locations" would be separated in this manner too. CLOVER scripts would need to be adapted to facilitate this change.
+\* "Jobs" and "Results" folders are kept outside of the main github repository, with the idea that these will  not interact with github updates. Ideally "Locations" would be separated in this manner too. CLOVER scripts would need to be adapted to facilitate this change.
 
 Generally, these changes shouldn't afffect the ability of pre-existing CLOVER jobs to run with the following changes: (1) path to scripts will need revising, and (2) location must be explicitly specified as a keyword when calling functions (as per exaple jobs included)
 
