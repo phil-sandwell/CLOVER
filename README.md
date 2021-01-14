@@ -3,7 +3,7 @@ CLOVER minigrid simulation and optimisation for supporting rural electrification
 
 Version of CLOVER adapted for use on Imperial College's High Performance Computing service.
 
-###OVERVIEW###
+##OVERVIEW
 
 This version of CLOVER has been adapted to facilitate bulk running of jobs on Imperial College's HPC. The main differences between this and forked version of CLOVER are as follows:
 
@@ -23,7 +23,7 @@ This version of CLOVER has been adapted to facilitate bulk running of jobs on Im
 
 Generally, these changes shouldn't afffect the ability of pre-existing CLOVER jobs to run with the following changes: (1) path to scripts will need revising, and (2) location must be explicitly specified as a keyword when calling functions (as per exaple jobs included)
 
-###SETTING UP###
+##SETTING UP
 
 1) Get an HPC account (see https://www.imperial.ac.uk/computational-methods/hpc/)
 
@@ -58,7 +58,7 @@ Generally, these changes shouldn't afffect the ability of pre-existing CLOVER jo
 	mv launch_CLOVER_job_multi_share.sh ~/bin/
 
 
-###FOR EACH JOB###
+##FOR EACH JOB
 
 7) If necessary, generate load and solar data - this is necessary for the included example job.  (This isn’t the best practice - this should really be done on nodes set up for running jobs rather than that you’re interacting with to avoid slowing it down for other users - but I think not so bad for only for a few locations). Scripts to do this for other locations can be made by adapting the included script for the example location. From hpc:
 
