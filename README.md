@@ -75,7 +75,9 @@ For the example job, the command would be:
 	cd /work/USERNAME/CLOVER-hpc/Jobs/
 	launch_CLOVER_job_multi_share.sh -j Bhinjpur_LiB_costs Bhinjpur_LiB_cyc1000_cost1270_It2yrs_Opt/Bhinjpur_LiB_cyc1000_cost1270_It2yrs_Opt.py Bhinjpur_LiB_cyc1000_cost176_It2yrs_Opt/Bhinjpur_LiB_cyc1000_cost176_It2yrs_Opt.py Bhinjpur_LiB_cyc1000_cost350_It2yrs_Opt/Bhinjpur_LiB_cyc1000_cost350_It2yrs_Opt.py
 
-You can get help/check what each option does by running ../Core_files/launch_CLOVER_job_multi_share.sh --help
+You can get help/check what each option does by running 
+
+        launch_CLOVER_job_multi_share.sh --help
 
 More generally, this script can be used to run up to 8 jobs simultaneously using the following command:
 
