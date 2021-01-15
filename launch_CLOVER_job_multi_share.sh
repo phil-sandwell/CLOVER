@@ -70,6 +70,10 @@ done
 
 PWD=` pwd `
 
+# Make runfile which will then be submitted to the hpc and run on an individual node.
+
+# Header to run file for whole set of jobs - set hpc variables,  import CLOVER etc.
+
  cat  > ${JOBNAME}.sh << EOF
 #!/bin/sh
 #PBS -l walltime=${TIME}
@@ -96,15 +100,18 @@ mkdir tmp_jobdir
 
 cd tmp_jobdir
 
-# Copy over necessary files
+# Copy over/make necessary files for all CLOVER runs
 mkdir CLOVER/
 cp -r ${CLOVER_PATH}/Core_files/Scripts CLOVER/
 mkdir CLOVER/Locations
-mkdir Jobs
+
 EOF
+
+# Sections to run each individual job
 
 for COM in $*
 do
+# Get details specific to job ${COM}
  WD=${COM%/*} #subdirectory that .com file is in
  BASENAME=$(basename ${COM} | sed 's/.py//g')
  # echo "COM: $COM PWD: $PWD WD: $WD"
@@ -116,13 +123,19 @@ do
   then
   cp -r ${CLOVER_PATH}/Core_files/Locations/$LOCATION/ CLOVER/Locations/
  fi
+
+# Make directory and copy in files to run ${BASENAME}
  
 mkdir ${BASENAME}/
 mkdir ${BASENAME}/Jobs/
- cp -r CLOVER/* ${BASENAME}
- mkdir -p ${CLOVER_PATH}/Results/$BASENAME
-
+cp -r CLOVER/* ${BASENAME}
 cp -r ${CLOVER_PATH}/Jobs/$BASENAME/ ${BASENAME}/Jobs/
+
+# Make directory to copy results back to once run is completed
+
+mkdir -p ${CLOVER_PATH}/Results/$BASENAME
+
+# Run this job (in the background so that other jobs can run simultaneously on this node)
 
 echo "Running python job $BASENAME"
 
@@ -130,7 +143,9 @@ echo "Running python job $BASENAME"
 
 EOF
 
-   cat >> tail.sh << EOF
+# Footer to copy all files back (this is not added directly to the runfile, but to a separate footer file added after the runs have completed)
+
+   cat >> footer.sh << EOF
 echo "Copying files back"
 
 cp -r ${BASENAME}/Locations/$LOCATION/Simulation/Saved\ simulations/ ${CLOVER_PATH}/Results/$BASENAME
@@ -143,9 +158,9 @@ done
 # Wait until all jobs complete
 echo "wait" >> ${JOBNAME}.sh
 
-# Add tail to script which copies all results back
-cat tail.sh >> ${JOBNAME}.sh
-rm tail.sh
+# Add footer to script which copies all results back
+cat footer.sh >> ${JOBNAME}.sh
+rm footer.sh
 
 # Add final commands to script
 cat >> ${JOBNAME}.sh << EOF
@@ -161,7 +176,7 @@ rm -r tmp_jobdir
 exit 0
 EOF
 
- #echo "CAPTURED QSUB COMMAND: "
+ # Submit job to hpc
  qsub -q "${QUEUE}" ${JOBNAME}.sh
 
 exit 0
