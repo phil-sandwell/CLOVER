@@ -85,7 +85,7 @@ More generally, this script can be used to run up to 8 jobs simultaneously using
 	launch_CLOVER_job_multi_share.sh -j UNIQUE_NAME_FOR_THIS_SET_OF_JOBS JOB1/JOB1.py JOB2/JOB2.py ... JOB8/JOB8.py 
 
 
-9) Wait for the job to finish. You can check the status of your job with the command 'qstat'. It will disappear from the queue when it has completed. The launch_CLOVER_job.sh script is currently set up to email you when a job's finished too. Easy to remove the line doing this from the launch script if it becomes a pain. Once the job is completed, results should appear in the folder /home/USERNAME/CLOVER-master/Results.
+9) Wait for the job to finish. You can check the status of your job with the command 'qstat'. It will disappear from the queue when it has completed. The launch_CLOVER_job.sh script is currently set up to email you when a job's finished too. Easy to remove the line doing this from the launch script if it becomes a pain. Once the job is completed, results should appear in the folder /work/USERNAME/CLOVER-hpc/Results.
 
 10) Copy results back to a convenient directory on your own computer when the job is finished. From a bash terminal in a convenient directory:
 
