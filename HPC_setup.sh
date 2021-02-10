@@ -1,7 +1,8 @@
 
 # Set up anaconda
-anaconda-setup
 module load anaconda3/personal
+
+anaconda-setup
 
 # Create new environment
 conda create -n CLOVER
