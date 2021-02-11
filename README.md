@@ -27,34 +27,34 @@ Generally, these changes shouldn't afffect the ability of pre-existing CLOVER jo
 
 1) Get an HPC account (see https://www.imperial.ac.uk/computational-methods/hpc/)
 
-2) Log on to hpc (using a terminal/bash if using mac/linux, or equivalent on pc). Make relevant directories. (NB. 'USERNAME' should be replaced with yor username)
+2) Log on to hpc (using a terminal/bash if using mac/linux, or equivalent on pc). Make relevant directories. (NB. 'USERNAME' should be replaced with yor username.)
 	
 
         ssh USERNAME@login.cx1.hpc.ic.ac.uk
-        mkdir /home/USERNAME/CLOVER-hpc/
-        mkdir /home/USERNAME/CLOVER-hpc/Core_files/
-        mkdir /home/USERNAME/CLOVER-hpc/Jobs/
+        mkdir /rds/general/user/${USER}/home/CLOVER-hpc/
+        mkdir /rds/general/user/${USER}/home/CLOVER-hpc/Core_files/
+        mkdir /rds/general/user/${USER}/home/CLOVER-hpc/Jobs/
 
 3) Import CLOVER-hpc and example jobs from Github. (NB. 'USERNAME' should be replaced with yor username)
 
-        cd /home/USERNAME/CLOVER-hpc/Core_files/
+        cd /rds/general/user/${USER}/home/CLOVER-hpc/Core_files/
         git clone -b CLOVER-hpc https://github.com/sheridanfew/CLOVER.git .
-        cd /home/USERNAME/CLOVER-hpc/Jobs/
+        cd /rds/general/user/${USER}/home/CLOVER-hpc/Jobs/
         git clone https://github.com/sheridanfew/CLOVER-hpc-job-example.git .
 
 4) Add your renewables.ninja API to the location file for Bhinjpur, using vi from hpc command line or a different text editor (NB. This should go in the middle of the final line: token,(YOUR_API_TOKEN),renewables.ninja API token'
 
-        vi /home/USERNAME/CLOVER-hpc/Core_files/Locations/Bhinjpur/Location\ Data/Location\ inputs.csv
+        vi /rds/general/user/${USER}/home/CLOVER-hpc/Core_files/Locations/Bhinjpur/Location\ Data/Location\ inputs.csv
 
 5) Run set of commands to set up CLOVER python environment containing necessary packages: (NB. May need to copy and paste commands within 'HPC_setup.sh' to command line on the hpc if this doesn't work)
 
-        cd /home/USERNAME/CLOVER-hpc/Core_files/
+        cd /rds/general/user/${USER}/home/CLOVER-hpc/Core_files/
         chmod +x ./HPC_setup.sh
         ./HPC_setup.sh
 
 6) Make the launch file executable and move it to your 'bin', from which it can be called from any location.
 
-        cd /home/USERNAME/CLOVER-hpc/Core_files/
+        cd /rds/general/user/${USER}/home/CLOVER-hpc/Core_files/
         chmod +x ./launch_CLOVER_job_multi_share.sh
         mv launch_CLOVER_job_multi_share.sh ~/bin/
 
@@ -63,7 +63,7 @@ Generally, these changes shouldn't afffect the ability of pre-existing CLOVER jo
 
 7) If necessary, generate load and solar data - this is necessary for the included example job.  (This isn’t the best practice - this should really be done on nodes set up for running jobs rather than that you’re interacting with to avoid slowing it down for other users - but I think not so bad for only for a few locations). Scripts to do this for other locations can be made by adapting the included script for the example location. From hpc:
 
-        cd /home/USERNAME/CLOVER-hpc/Core_files/
+        cd /rds/general/user/${USER}/home/CLOVER-hpc/Core_files/
         module load anaconda3/personal
         source activate CLOVER
         python Load_Solar_Bhinjpur.py 
@@ -72,7 +72,7 @@ Generally, these changes shouldn't afffect the ability of pre-existing CLOVER jo
 
 For the example job, the command would be:
 
-	cd /home/USERNAME/CLOVER-hpc/Jobs/
+	cd /rds/general/user/${USER}/home/CLOVER-hpc/Jobs/
 	launch_CLOVER_job_multi_share.sh -j Bhinjpur_LiB_costs Bhinjpur_LiB_cyc1000_cost1270_It2yrs_Opt/Bhinjpur_LiB_cyc1000_cost1270_It2yrs_Opt.py Bhinjpur_LiB_cyc1000_cost176_It2yrs_Opt/Bhinjpur_LiB_cyc1000_cost176_It2yrs_Opt.py Bhinjpur_LiB_cyc1000_cost350_It2yrs_Opt/Bhinjpur_LiB_cyc1000_cost350_It2yrs_Opt.py
 
 You can get help/check what each option does by running 
@@ -81,24 +81,24 @@ You can get help/check what each option does by running
 
 More generally, this script can be used to run up to 8 jobs simultaneously using the following command:
 
-	cd /home/USERNAME/CLOVER-hpc/Jobs/
+	cd /rds/general/user/${USER}/home/CLOVER-hpc/Jobs/
 	launch_CLOVER_job_multi_share.sh -j UNIQUE_NAME_FOR_THIS_SET_OF_JOBS JOB1/JOB1.py JOB2/JOB2.py ... JOB8/JOB8.py 
 
 
-9) Wait for the job to finish. You can check the status of your job with the command 'qstat'. It will disappear from the queue when it has completed. The launch_CLOVER_job.sh script is currently set up to email you when a job's finished too. Easy to remove the line doing this from the launch script if it becomes a pain. Once the job is completed, results should appear in the folder /home/USERNAME/CLOVER-hpc/Results.
+9) Wait for the job to finish. You can check the status of your job with the command 'qstat'. It will disappear from the queue when it has completed. The launch_CLOVER_job.sh script is currently set up to email you when a job's finished too. Easy to remove the line doing this from the launch script if it becomes a pain. Once the job is completed, results should appear in the folder /rds/general/user/USERNAME/home/CLOVER-hpc/Results.
 
 10) Copy results back to a convenient directory on your own computer when the job is finished. From a bash terminal in a convenient directory:
 
-        scp -r USERNAME@login.cx1.hpc.ic.ac.uk:/home/USERNAME/CLOVER-hpc/Results/NAME_OF_YOUR_JOB/ .
+        scp -r USERNAME@login.cx1.hpc.ic.ac.uk:/rds/general/user/USERNAME/home/CLOVER-hpc/Results/NAME_OF_YOUR_JOB/ .
 
 For the example:
 
-	scp -r USERNAME@login.cx1.hpc.ic.ac.uk:/home/USERNAME/CLOVER-hpc/Results/Bhinjpur_LiB_cyc1000_cost1270_It2yrs_Opt/ . 
-	scp -r USERNAME@login.cx1.hpc.ic.ac.uk:/home/USERNAME/CLOVER-hpc/Results/Bhinjpur_LiB_cyc1000_cost176_It2yrs_Opt/ . 
-	scp -r USERNAME@login.cx1.hpc.ic.ac.uk:/home/USERNAME/CLOVER-hpc/Bhinjpur_LiB_cyc1000_cost350_It2yrs_Opt/ . 
+	scp -r USERNAME@login.cx1.hpc.ic.ac.uk:/rds/general/user/USERNAME/home/CLOVER-hpc/Results/Bhinjpur_LiB_cyc1000_cost1270_It2yrs_Opt/ . 
+	scp -r USERNAME@login.cx1.hpc.ic.ac.uk:/rds/general/user/USERNAME/home/CLOVER-hpc/Results/Bhinjpur_LiB_cyc1000_cost176_It2yrs_Opt/ . 
+	scp -r USERNAME@login.cx1.hpc.ic.ac.uk:/rds/general/user/USERNAME/home/CLOVER-hpc/Bhinjpur_LiB_cyc1000_cost350_It2yrs_Opt/ . 
 
 Or using a wildcard:
 
-	scp -r USERNAME@login.cx1.hpc.ic.ac.uk:/home/USERNAME/CLOVER-master/Results/Bhinjpur_LiB_cyc1000_cost*_It2yrs_Opt/ . 
+	scp -r USERNAME@login.cx1.hpc.ic.ac.uk:/rds/general/user/USERNAME/home/CLOVER-master/Results/Bhinjpur_LiB_cyc1000_cost*_It2yrs_Opt/ . 
 
 11) Analyse results locally as you see fit. I have included a file 'run_info.sh' in this repo, which can be helpful for analysis of a large set of csv files in one directory.
