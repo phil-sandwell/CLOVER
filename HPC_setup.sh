@@ -11,4 +11,4 @@ conda create -n CLOVER
 source activate CLOVER
 
 # install packages:
-conda install python=3.7 pandas numpy scipy
+conda install python=3.7 pandas numpy scipy requests
