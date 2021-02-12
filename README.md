@@ -34,6 +34,8 @@ Generally, these changes shouldn't afffect the ability of pre-existing CLOVER jo
         mkdir /rds/general/user/${USER}/home/CLOVER-hpc/
         mkdir /rds/general/user/${USER}/home/CLOVER-hpc/Core_files/
         mkdir /rds/general/user/${USER}/home/CLOVER-hpc/Jobs/
+        mkdir /rds/general/user/${USER}/home/CLOVER-hpc/Results/
+
 
 3) Import CLOVER-hpc and example jobs from Github. (NB. 'USERNAME' should be replaced with yor username)
 
@@ -42,9 +44,11 @@ Generally, these changes shouldn't afffect the ability of pre-existing CLOVER jo
         cd /rds/general/user/${USER}/home/CLOVER-hpc/Jobs/
         git clone https://github.com/sheridanfew/CLOVER-hpc-job-example.git .
 
-4) Add your renewables.ninja API to the location file for Bhinjpur, using vi from hpc command line or a different text editor (NB. This should go in the middle of the final line: token,(YOUR_API_TOKEN),renewables.ninja API token'
+4) Add your renewables.ninja API to the location file for Bhinjpur. The command below does this be replacing the appropriate renewables ninja line using sed (replace YOUR_API_TOKEN in the command below below with your API token). 
 
-        vi /rds/general/user/${USER}/home/CLOVER-hpc/Core_files/Locations/Bhinjpur/Location\ Data/Location\ inputs.csv
+
+        API_TOKEN="YOUR_API_TOKEN"
+        sed -i "s/token,,renewables.ninja API token/token,${API_TOKEN},renewables.ninja API token/" /rds/general/user/${USER}/home/CLOVER-hpc/Core_files/Locations/Bhinjpur/Location\ Data/Location\ inputs.csv
 
 5) Run set of commands to set up CLOVER python environment containing necessary packages: (NB. May need to copy and paste commands within 'HPC_setup.sh' to command line on the hpc if this doesn't work)
 
@@ -55,8 +59,9 @@ Generally, these changes shouldn't afffect the ability of pre-existing CLOVER jo
 6) Make the launch file executable and move it to your 'bin', from which it can be called from any location.
 
         cd /rds/general/user/${USER}/home/CLOVER-hpc/Core_files/
-        chmod +x ./launch_CLOVER_job_multi_share.sh
-        mv launch_CLOVER_job_multi_share.sh ~/bin/
+        chmod +x ./Launch_Script/launch_CLOVER_job_multi_share.sh
+        echo "# Add CLOVER launch dir to path" >> /rds/general/user/${USER}/home/.bash_profile
+        echo "PATH=\$PATH:/rds/general/user/${USER}/home/CLOVER-hpc/Core_files/Launch_Script/" >> /rds/general/user/${USER}/home/.bash_profile
 
 
 ## For each job

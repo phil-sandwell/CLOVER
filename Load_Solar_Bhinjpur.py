@@ -28,7 +28,7 @@ for location in locations:
     for date in dates:
         print('Getting solar data for ',location,' in ',date)
         Solar(location=location).save_solar_output(date)
-        time.sleep(60) # Required to avoid upsetting renewables.ninja
+        time.sleep(15) # Required to avoid upsetting renewables.ninja, website says limit is 6 requests/min (or 50/hour)
 
     print('Generating 20 year PV file from data...')
     Solar(location=location).total_solar_output(2009)
