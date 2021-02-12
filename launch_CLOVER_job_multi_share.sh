@@ -7,7 +7,7 @@ MEM=11800mb   #Simon Burbidge correction - lots of nodes with 12GB physical memo
 QUEUE="" #default route
 TIME="71:58:02" # Two minutes to midnight :^)
 USERNAME=$USER
-CLOVER_PATH="/rds/general/user/${USERNAME}/home/"
+CLOVER_PATH="/rds/general/user/${USERNAME}/home/CLOVER-hpc/"
 
 function USAGE()
 {
