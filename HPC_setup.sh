@@ -1,7 +1,6 @@
 
 # Set up anaconda
 module load anaconda3/personal
-
 anaconda-setup
 
 # Create new environment
