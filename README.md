@@ -62,6 +62,7 @@ Generally, these changes shouldn't afffect the ability of pre-existing CLOVER jo
         chmod +x ./Launch_Script/launch_CLOVER_job_multi_share.sh
         echo "# Add CLOVER launch dir to path" >> /rds/general/user/${USER}/home/.bash_profile
         echo "PATH=\$PATH:/rds/general/user/${USER}/home/CLOVER-hpc/Core_files/Launch_Script/" >> /rds/general/user/${USER}/home/.bash_profile
+        PATH=$PATH:/rds/general/user/${USER}/home/CLOVER-hpc/Core_files/Launch_Script/
 
 
 ## For each job
