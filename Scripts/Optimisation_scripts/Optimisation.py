@@ -18,6 +18,7 @@ For more information, please email:
 import numpy as np
 import pandas as pd
 import datetime
+import os
 
 import sys
 sys.path.insert(0, './Scripts/Impact_scripts/')
@@ -782,6 +783,9 @@ class Optimisation():
         Outputs:
             Optimisation saved to .csv file
         """
+        if not os.path.exists(self.optimisation_storage):
+            os.makedirs(self.optimisation_storage)
+        
         if filename != None:
             optimisation_name.to_csv(self.optimisation_storage + str(filename) + '.csv')
         else:

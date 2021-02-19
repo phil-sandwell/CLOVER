@@ -18,6 +18,7 @@ import numpy as np
 import pandas as pd
 import datetime
 import math
+import os
 
 import sys
 sys.path.insert(0, './Scripts/Generation_scripts/')
@@ -320,6 +321,9 @@ class Energy_System():
         Outputs:
             Simulation saved to .csv file
         """
+        if not os.path.exists(self.simulation_storage):
+            os.makedirs(self.simulation_storage)
+
         if filename != None:
             simulation_name.to_csv(self.simulation_storage + str(filename) + '.csv')
         else:
