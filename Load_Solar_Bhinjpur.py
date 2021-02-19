@@ -1,3 +1,4 @@
+# coding: utf-8
 # Import Packages
 import time
 import os
