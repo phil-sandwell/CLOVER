@@ -76,7 +76,7 @@ An example location, “Bahraich” in India, is included in the initial downloa
 
 ## Use of CLOVER on Imperial High Performance Computing Service
 
-This version of CLOVER has been adapted to facilitate bulk running of jobs on Imperial College's HPC. The following steps should allow you to set up and run jobs here:
+This version of CLOVER has been adapted to facilitate bulk running of jobs on Imperial College's HPC. This allows more jobs to be run simultaneously without using up processing power of your local computer. The following steps should allow you to set up and run jobs:
 
 ### HPC Setup
 
@@ -98,19 +98,19 @@ This version of CLOVER has been adapted to facilitate bulk running of jobs on Im
         cd /rds/general/user/${USER}/home/CLOVER-hpc/Jobs/
         git clone https://github.com/sheridanfew/CLOVER-hpc-job-example.git .
 
-4) Add your renewables.ninja API to the location file for Bhinjpur. The command below does this be replacing the appropriate renewables ninja line using sed (replace YOUR_API_TOKEN in the command below below with your API token). 
+4) Add your renewables.ninja API to the location file for Bhinjpur. The command below does this be replacing the appropriate renewables ninja line using sed (replace YOUR_API_TOKEN in the command below below with your API token). Alternatively, you could use vim or set up Visual Studio code for a more user-friendly way of interacting with files on the hpc.
 
 
         API_TOKEN="YOUR_API_TOKEN"
         sed -i "s/token,,renewables.ninja API token/token,${API_TOKEN},renewables.ninja API token/" /rds/general/user/${USER}/home/CLOVER-hpc/Core_files/Locations/Bhinjpur/Location\ Data/Location\ inputs.csv
 
-5) Run set of commands to set up CLOVER python environment containing necessary packages: (NB. May need to copy and paste commands within 'HPC_setup.sh' to command line on the hpc if this doesn't work)
+5) Run set of commands to set up a CLOVER python environment containing necessary packages: (NB. You may need to copy and paste commands within 'HPC_setup.sh' to command line on the hpc if this doesn't work)
 
         cd /rds/general/user/${USER}/home/CLOVER-hpc/Core_files/
         chmod +x ./HPC_setup.sh
         ./HPC_setup.sh
 
-6) Make the launch file executable and at its location to your path so that you can run it from any location.
+6) Make the launch file executable and add its location to your path so that you can run it from any location.
 
         cd /rds/general/user/${USER}/home/CLOVER-hpc/Core_files/
         chmod +x ./Launch_Script/launch_CLOVER_jobs.sh
@@ -119,9 +119,9 @@ This version of CLOVER has been adapted to facilitate bulk running of jobs on Im
         PATH=$PATH:/rds/general/user/${USER}/home/CLOVER-hpc/Core_files/Launch_Script/
 
 
-## Commands for each hpc job
+## Commands for each HPC job
 
-7) If necessary, generate load and solar data - this is necessary for the included example job.  (This isn’t the best practice - this should really be done on nodes set up for running jobs rather than that you’re interacting with to avoid slowing it down for other users - but I think not so bad for only for a few locations). Scripts to do this for other locations can be made by adapting the included script for the example location. Commands to do this when logged into the hpc:
+7) If necessary, generate load and solar data - this is necessary for the included example job.  (Doing this from the command line isn’t best practice - this should really be done on nodes set up for running jobs rather than that you’re interacting with to avoid slowing it down for other users - but I think not so bad for only for a few locations). Scripts to do this for other locations can be made by adapting the included Load_Solar_Bhinjpur script. Commands to do this when logged into the hpc:
 
         cd /rds/general/user/${USER}/home/CLOVER-hpc/Core_files/
         module load anaconda3/personal
@@ -130,18 +130,18 @@ This version of CLOVER has been adapted to facilitate bulk running of jobs on Im
 
 8) Navigate to Jobs directory and send your CLOVER jobs to be run!
 
-For the example job, the command would be:
+For the example job, the commands would be:
 
 	cd /rds/general/user/${USER}/home/CLOVER-hpc/Jobs/
 	launch_CLOVER_jobs.sh -j Bhinjpur_Batt_costs Bhinjpur_LowBattCost/Bhinjpur_LowBattCost.py Bhinjpur_MidBattCost/Bhinjpur_MidBattCost.py Bhinjpur_HiBattCost/Bhinjpur_HiBattCost.py
 
-(inspecting these three python job files can also help to understand how to adapt them for new jobs)
+(inspecting these three python job files can help to understand how to adapt them for new jobs)
 
-You can get help/check what each option in hte launch script does by running 
+You can get help/check what each option in the launch script does by running 
 
         launch_CLOVER_jobs.sh --help
 
-More generally, this script can be used to run up to 8 jobs simultaneously bu adapting the following command:
+More generally, this script can be used to run up to 8 jobs simultaneously by adapting the following command:
 
 	cd /rds/general/user/${USER}/home/CLOVER-hpc/Jobs/
 	launch_CLOVER_jobs.sh -j UNIQUE_NAME_FOR_THIS_SET_OF_JOBS JOB1/JOB1.py JOB2/JOB2.py ... JOB8/JOB8.py 
@@ -163,7 +163,7 @@ Or using a wildcard:
 
 	scp -r USERNAME@login.cx1.hpc.ic.ac.uk:/rds/general/user/USERNAME/home/CLOVER-master/Results/Bhinjpur_*BattCost/ . 
 
-11) Analyse results locally as you see fit. I have included a file 'run_info.sh' in this repository, which can be helpful to summarise key results large set of optimisation results csv files in one directory.
+11) Analyse results locally as you see fit. I have included a bash script, 'run_info.sh' in this repository, which could be helpful to summarise key outputs of a large set of optimisation results csv files in one directory.
 
 For more information, contact Phil Sandwell (philip.sandwell@gmail.com)
 
