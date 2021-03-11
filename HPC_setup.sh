@@ -1,3 +1,4 @@
+# coding: utf-8
 
 # Set up anaconda
 module load anaconda3/personal
