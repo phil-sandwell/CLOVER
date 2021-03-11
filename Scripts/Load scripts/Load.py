@@ -25,6 +25,9 @@ from Conversion import Conversion
 
 class Load():
     def __init__(self,**kwargs):
+        # kwargs must include location
+        # kwargs can include location_inputs, device_inputs (to override inputs in location files)
+        # kwargs can include no_commercial_scaling, no_public_scaling (if specified as "TRUE", these alter load generation approach as described in comments below)
         self.location = kwargs.get('location')
         self.CLOVER_filepath = '.'
         self.location_filepath = self.CLOVER_filepath + '/Locations/' + self.location
@@ -54,8 +57,6 @@ class Load():
         self.device_load_filepath = self.device_filepath + 'Device load/'
         self.no_commercial_scaling = kwargs.get('no_commercial_scaling','FALSE') # SF: I added this to consider different community sizes with the same commercial load.
         self.no_public_scaling = kwargs.get('no_public_scaling','FALSE') # SF: I added this to consider different community sizes with the same public load.
-        self.baseline_load = kwargs.get('baseline_load','FALSE') # SF: I added this to consider different community sizes with the same commercial load.
-
 
 # =============================================================================
 #       Calculate the load of devices in the community
@@ -76,9 +77,6 @@ class Load():
         commercial_load = pd.DataFrame(np.zeros((int(self.location_inputs['Years'])*365*24, 1)))
         public_load = pd.DataFrame(np.zeros((int(self.location_inputs['Years'])*365*24, 1)))
 
-        if self.baseline_load != 'FALSE': # If specified, add baseline load
-            add_load = pd.read_csv(self.device_load_filepath + self.baseline_load + '_load.csv', index_col = 0).reset_index(drop=True)
-            commercial_load = pd.DataFrame(commercial_load.values + add_load.values)
 
         for i in range(len(self.device_inputs)):
             device_info = self.device_inputs.iloc[i]

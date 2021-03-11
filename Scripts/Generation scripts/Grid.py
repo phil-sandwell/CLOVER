@@ -19,6 +19,8 @@ import random
 
 class Grid():
     def __init__(self,**kwargs):
+        # kwargs must include location
+        # kwargs can include grid_inputs (to override inputs in location files)
         self.kwargs = kwargs
         self.location = kwargs.get('location')
         self.CLOVER_filepath = '.'
