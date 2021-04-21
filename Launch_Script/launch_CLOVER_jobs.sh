@@ -17,7 +17,7 @@ Sheridan's script to launch multiple CLOVER jobs, following Jarv's .com launcher
 Launching multiple CLOVER jobs allows efficient use of the multiple processors on nodes to which jobs are submitted. The number of jobs launched should ideally equal the number of processors requested. 
 These jobs must contain the a line 'location=LOCATION_NAME_HERE' in the first few lines so that the script knows where to get Location details from.cp -r ${CLOVER_PATH}/Core_files/Locations/$LOCATION/ CLOVER/Locations/
 
-USAGE: ./launch_CLOVER_job.sh [-nm] -j COLLECTIVE_NAME Job1.py Job2.py Job3.py ...
+USAGE: ./launch_CLOVER_jobs.sh [-nm] -j COLLECTIVE_NAME Job1.py Job2.py Job3.py ...
 
 OPTIONS:
 	-j collective job name
@@ -165,7 +165,8 @@ rm footer.sh
 # Add final commands to script
 cat >> ${JOBNAME}.sh << EOF
 
-mail -s "HPC Job Done: ${JOBNAME}" ${USERNAME}@imperial.ac.uk <<< 'Hooray!'
+# Used to be able to email yourself when the job is finished - this command doesn't seem to work any more
+#mail -s "HPC Job Done: ${JOBNAME}" ${USERNAME}@imperial.ac.uk <<< 'Hooray!'
 
 echo "Job finished:"
 date

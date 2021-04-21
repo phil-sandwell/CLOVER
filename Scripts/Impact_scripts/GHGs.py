@@ -24,6 +24,8 @@ from Conversion import Conversion
 
 class GHGs():
     def __init__(self,**kwargs):
+        # kwargs must include location
+        # kwargs can include location_inputs, GHG_inputs, finance_inputs (to override inputs in location files)
         self.location = kwargs.get('location')
         self.CLOVER_filepath = '.'
         self.location_filepath = self.CLOVER_filepath + '/Locations/' + self.location

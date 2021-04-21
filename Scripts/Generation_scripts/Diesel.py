@@ -19,6 +19,8 @@ import numpy as np
 
 class Diesel():
     def __init__(self,**kwargs): 
+        # kwargs must include location
+        # kwargs can include diesel_inputs (to override inputs in location files)
         self.size = 1
         self.location = kwargs.get('location')
         self.CLOVER_filepath = '.'
@@ -34,7 +36,6 @@ class Diesel():
                     print(self.diesel_inputs.index)
                     exit(1)
                 self.diesel_inputs.at[i[0]] = i[1]
-        self.efficient_diesel = kwargs.get('efficient_diesel','FALSE')
 #%%       
 #   Energy threshold, above which the generator should switch on
     def find_deficit_threshold(self,unmet_energy,blackouts,backup_threshold):
@@ -95,10 +96,11 @@ class Diesel():
         diesel_minimum_load = float(self.diesel_inputs[1]['Diesel minimum load'])
         capacity = float(capacity)
         load_factor = diesel_energy / capacity
-        if self.efficient_diesel == 'FALSE':
-            above_minimum = load_factor * (load_factor > diesel_minimum_load)
-            below_minimum = diesel_minimum_load * (load_factor <= diesel_minimum_load)
-            load_factor = pd.DataFrame(above_minimum.values + below_minimum.values) * diesel_times
+
+        above_minimum = load_factor * (load_factor > diesel_minimum_load)
+        below_minimum = diesel_minimum_load * (load_factor <= diesel_minimum_load)
+        load_factor = pd.DataFrame(above_minimum.values + below_minimum.values) * diesel_times
+
         fuel_usage = load_factor * capacity * diesel_consumption
         fuel_usage = fuel_usage.astype(float)
         return fuel_usage # in litres

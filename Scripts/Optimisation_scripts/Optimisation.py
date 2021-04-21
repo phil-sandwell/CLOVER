@@ -31,6 +31,10 @@ from Energy_System import Energy_System
 #%%
 class Optimisation():
     def __init__(self,**kwargs):
+        # kwargs must include location
+        # kwargs can include optimisation_inputs (to override optimisation inputs in location files)
+        # kwargs can include scenario_inputs, energy_system_inputs, location_inputs, device_inputs, diesel_inputs, grid_inputs, finance_inputs, GHG_inputs (passed on to other scripts to override inputs in location files)
+        # kwargs can include storage_type - if 'PbA', it's assumed that the battery is degraded sufficiently that it must be discarded at the end of each simulation period. Assumption to be used with caution depending on simulation period and application.
         self.kwargs = kwargs
         self.location = kwargs.get('location')
         self.CLOVER_filepath = '.'
@@ -535,7 +539,7 @@ class Optimisation():
                        previous_system.loc['System details']['Final PV size'])
         diesel_addition = (simulation_details.loc['System details']['Diesel capacity']-
                        previous_system.loc['System details']['Diesel capacity'])
-        if self.storage_type != 'PbA': # If lead-acid, assume that batteries are dead by end of simulation period (currently based on simulation period of ~4-5 years) as per cost
+        if self.storage_type != 'PbA': # If lead-acid, assume that batteries are dead by end of simulation period
             storage_addition = (simulation_details.loc['System details']['Initial storage size']-
                        previous_system.loc['System details']['Final storage size'])
         else:
@@ -619,7 +623,7 @@ class Optimisation():
                        previous_system.loc['System details']['Final PV size'])
         diesel_addition = (simulation_details.loc['System details']['Diesel capacity']-
                        previous_system.loc['System details']['Diesel capacity'])
-        if self.storage_type != 'PbA': # If lead-acid, assume that batteries are dead by end of simulation period (currently based on simulation period of ~4-5 years) as per cost
+        if self.storage_type != 'PbA': # If lead-acid, assume that batteries are dead by end of simulation period
             storage_addition = (simulation_details.loc['System details']['Initial storage size']-
                        previous_system.loc['System details']['Final storage size'])
         else:

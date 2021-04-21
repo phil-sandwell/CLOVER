@@ -5,10 +5,12 @@ Battery conversion in,1,Conversion efficiency (0.0-1.0)
 Battery conversion out,0.8,Conversion efficiency (0.0-1.0)
 Battery cycle lifetime,1000,Expected number of cycles over lifetime
 Battery lifetime loss,0.3,Fractional loss over lifetime (0.0-1.0)
-Battery C rate,0.33,Charge/discharge rate
+Battery C rate discharging,0.33,Discharge rate
+Battery C rate charging,0.33,Charge rate
 Transmission efficiency DC,0.95,Efficiency of DC distribution network
 Transmission efficiency AC,1,Efficiency of AC distribution network
 DC to AC conversion,0.75,Conversion efficiency (0.0-1.0)
 DC to DC conversion,0.95,Conversion efficiency (0.0-1.0)
 AC to DC conversion,0.8,Conversion efficiency (0.0-1.0)
 AC to AC conversion,0.98,Conversion efficiency (0.0-1.0)
+

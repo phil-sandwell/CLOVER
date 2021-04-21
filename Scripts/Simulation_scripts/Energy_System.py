@@ -30,6 +30,9 @@ from Load import Load
 #%%
 class Energy_System():
     def __init__(self,**kwargs):
+        # kwargs must include location
+        # kwargs can include energy_system_inputs (to override inputs in location files)
+        # kwargs can include scenario_inputs, location_inputs, device_inputs, diesel_inputs, grid_inputs, finance_inputs, GHG_inputs (passed on to other scripts to override inputs in location files)
         self.kwargs = kwargs
         self.location = kwargs.get('location')
         self.CLOVER_filepath = '.'
@@ -60,7 +63,6 @@ class Energy_System():
         self.kerosene_data_filepath = self.location_filepath + '/Load/Devices in use/kerosene_in_use.csv'
         self.kerosene_usage = pd.read_csv(self.kerosene_data_filepath, index_col = 0).reset_index(drop=True)
         self.simulation_storage = self.location_filepath + '/Simulation/Saved simulations/'
-        self.auto_recharge_batt = kwargs.get('auto_recharge_batt','FALSE') # If 'TRUE', then automatically recharge batteries from diesel generator when charge falls below min charge - assumes this is possible in 1 hour. If 'FALSE', CLOVER default of meeting load with diesel and not recharging batteries.
 #%%
 # =============================================================================
 # SIMULATION FUNCTIONS
@@ -133,7 +135,8 @@ class Energy_System():
         battery_leakage = self.energy_system_inputs[1]['Battery leakage']
         battery_eff_in = self.energy_system_inputs[1]['Battery conversion in']
         battery_eff_out = self.energy_system_inputs[1]['Battery conversion out']
-        battery_C_rate = self.energy_system_inputs[1]['Battery C rate']
+        battery_C_rate_out = self.energy_system_inputs[1]['Battery C rate discharging']
+        battery_C_rate_in = self.energy_system_inputs[1]['Battery C rate charging']
         battery_lifetime_loss = self.energy_system_inputs[1]['Battery lifetime loss']
         cumulative_storage_power = 0.0
         hourly_storage = []
@@ -167,9 +170,9 @@ class Energy_System():
                 new_hourly_storage = initial_storage + battery_energy_flow
             else:
                 if battery_energy_flow >= 0.0:   # Battery charging
-                    new_hourly_storage = hourly_storage[t - 1] * (1.0 - battery_leakage) + battery_eff_in * min(battery_energy_flow, battery_C_rate * (max_storage - min_storage))
+                    new_hourly_storage = hourly_storage[t - 1] * (1.0 - battery_leakage) + battery_eff_in * min(battery_energy_flow, battery_C_rate_in * (max_storage - min_storage))
                 else:                           # Battery discharging
-                    new_hourly_storage = hourly_storage[t - 1] * (1.0 - battery_leakage) + (1.0 / battery_eff_out) * max(battery_energy_flow, (-1.0) * battery_C_rate * (max_storage - min_storage))
+                    new_hourly_storage = hourly_storage[t - 1] * (1.0 - battery_leakage) + (1.0 / battery_eff_out) * max(battery_energy_flow, (-1.0) * battery_C_rate_out * (max_storage - min_storage))
                     
 #   Dumped energy and unmet demand
             energy_surplus.append(max(new_hourly_storage - max_storage, 0.0))   #Battery too full
@@ -179,16 +182,7 @@ class Energy_System():
             if new_hourly_storage >= max_storage:
                 new_hourly_storage = max_storage
             elif new_hourly_storage <= min_storage:
-                if self.auto_recharge_batt == 'FALSE':
-                    new_hourly_storage = min_storage
-                else: # Added this option to automaticaally fully recharge the battery from diesel if it goes below a given threshold.
-                    print('Stored energy dropping to'+str(new_hourly_storage)+', which is less than the threshold, '+str(min_storage)+'. Using generator to recharge battery.')
-                    print('Changing energy in storage from'+str(new_hourly_storage)+' to max storage, '+str(max_storage)+'.')
-                    print('Changing energy deficit for this hour from '+str(energy_deficit[t])+' to '+str(max_storage - new_hourly_storage)+'.')
-                    energy_deficit[t] = max_storage - new_hourly_storage
-                    new_hourly_storage = max_storage
-
-
+                new_hourly_storage = min_storage
 
 #   Update hourly_storage
             hourly_storage.append(new_hourly_storage)  
@@ -212,12 +206,7 @@ class Energy_System():
         storage_power_supplied = pd.DataFrame(storage_power_supplied)
 
 #   Find unmet energy
-        if self.auto_recharge_batt == 'FALSE': 
-            unmet_energy = pd.DataFrame((load_energy.values - renewables_energy_used_directly.values
-                                    - grid_energy.values - storage_power_supplied.values))    
-        else:
-            unmet_energy = pd.DataFrame(energy_deficit) # Amended here such that unmet energy is only recorded (& diesel gen only comes on) when the battery has been auto-recharged  
-
+        unmet_energy = pd.DataFrame((load_energy.values - renewables_energy_used_directly.values - grid_energy.values - storage_power_supplied.values))    
         blackout_times = ((unmet_energy > 0) * 1).astype(float)
 
 #   Use backup diesel generator
