@@ -60,6 +60,7 @@ class Energy_System():
                     print(self.scenario_inputs.index)
                     exit(1)
                 self.scenario_inputs.at[i[0],1] = i[1]
+        self.total_load_file=kwargs.get('load_override','total_load.csv')
         self.kerosene_data_filepath = self.location_filepath + '/Load/Devices in use/kerosene_in_use.csv'
         self.kerosene_usage = pd.read_csv(self.kerosene_data_filepath, index_col = 0).reset_index(drop=True)
         self.simulation_storage = self.location_filepath + '/Simulation/Saved simulations/'
@@ -476,7 +477,7 @@ class Energy_System():
         Outputs:
             Gives a dataframe with columns for the load of domestic, commercial and public devices
         '''
-        loads = pd.read_csv(self.location_filepath + '/Load/Device load/total_load.csv',index_col=0)*0.001
+        loads = pd.read_csv(self.location_filepath + '/Load/Device load/' + self.total_load_file,index_col=0)*0.001
         total_load = pd.DataFrame(np.zeros(len(loads)))
         if self.scenario_inputs[1]['Domestic'] == 'Y':
             total_load = pd.DataFrame(total_load.values + pd.DataFrame(loads['Domestic']).values)
