@@ -7,3 +7,4 @@ seaborn>=0.11.1
 scipy>=1.6.2
 tqdm>=4.59.0
 types-requests>=2.26
+scikit-learn>=0.0
