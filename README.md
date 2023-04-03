@@ -1,4 +1,12 @@
-# CLOVER
+# :no_entry: DEPRECATED
+
+This is no longer supported as a newer version has been created and is maintained at [CLOVER-energy/CLOVER](https://github.com/CLOVER-energy/CLOVER). Please consider using this newer version instead :smiley:.
+
+[![No Maintenance Intended](http://unmaintained.tech/badge.svg)](http://unmaintained.tech/)
+
+# CLOVER <former description>
+_Description applicable to versions up to, and including,_ `v4.0`
+
 CLOVER minigrid simulation and optimisation for supporting rural electrification in developing countries
 CLOVER Quick Start Guide
 
